@@ -1073,6 +1073,35 @@ function load(){
   }
 }
 
+// ==================== FUNÇÕES DE PERSISTÊNCIA LOCAL & NUVEM ====================
+function save(){
+  try { localStorage.setItem(KEY, JSON.stringify(animais)); } catch(e){}
+  if (navigator.onLine && authUser && authUser.id) {
+    sincronizarNuvem(true);
+  }
+}
+
+function saveChuvas(){
+  try { localStorage.setItem(KEY_CHUVAS, JSON.stringify(chuvas)); } catch(e){}
+  if (navigator.onLine && authUser && authUser.id) {
+    sincronizarNuvem(true);
+  }
+}
+
+function saveMaquinas(){
+  try { localStorage.setItem(KEY_MAQUINAS, JSON.stringify(maquinas)); } catch(e){}
+  if (navigator.onLine && authUser && authUser.id) {
+    sincronizarNuvem(true);
+  }
+}
+
+function saveLancamentos(){
+  try { localStorage.setItem(KEY_LANCS, JSON.stringify(lancamentos)); } catch(e){}
+  if (navigator.onLine && authUser && authUser.id) {
+    sincronizarNuvem(true);
+  }
+}
+
 // ==================== CONFIGURAÇÃO SUPABASE (NUVEM & AUTH) ====================
 var SUPABASE_URL = "https://lnxpvmfhwexzskbqitbu.supabase.co";
 var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxueHB2bWZod2V4enNrYnFpdGJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1MDk2MjksImV4cCI6MjExMDA4NTYyOX0.PFZmq4VCWdR7bnYJIuXLPBAMeMe7oBpx2YR02cC4f7A";
@@ -2458,11 +2487,21 @@ $("salvar").onclick = function(){
 $("cancelar").onclick = function(){ show("reb"); };
 
 $("excluir").onclick = function(){
-  if (confirm("Tem certeza que deseja apagar o cadastro deste animal permanentemente?")) {
-    animais = animais.filter(function(a){ return a.id !== editId; });
-    save();
-    show("reb");
+  if (!confirm("Tem certeza que deseja apagar o cadastro deste animal permanentemente?")) {
+    return;
   }
+
+  var idApagar = editId;
+  animais = animais.filter(function(a){ return a.id !== idApagar; });
+  save();
+  show("reb");
+
+  if (navigator.onLine && authUser && authUser.id) {
+    var token = authUser.access_token || SUPABASE_KEY;
+    var hdrs = { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + token };
+    fetch(SUPABASE_URL + "/rest/v1/animais?id=eq." + idApagar, { method: "DELETE", headers: hdrs }).catch(function(e){ console.error(e); });
+  }
+  alert("🗑️ Animal excluído com sucesso!");
 };
 
 // ==================== EXPORTAÇÃO PARA EXCEL (.CSV) ====================
@@ -3170,11 +3209,20 @@ $("btnSalvarChuva").onclick = function(){
 };
 
 window.excluirChuva = function(id){
-  if (confirm("Deseja apagar este registro de chuva?")) {
-    chuvas = chuvas.filter(function(c){ return c.id !== id; });
-    saveChuvas();
-    renderPluv();
+  if (!confirm("Deseja apagar este registro de chuva?")) {
+    return;
   }
+
+  chuvas = chuvas.filter(function(c){ return c.id !== id; });
+  saveChuvas();
+  renderPluv();
+
+  if (navigator.onLine && authUser && authUser.id) {
+    var token = authUser.access_token || SUPABASE_KEY;
+    var hdrs = { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + token };
+    fetch(SUPABASE_URL + "/rest/v1/chuvas?id=eq." + id, { method: "DELETE", headers: hdrs }).catch(function(e){ console.error(e); });
+  }
+  alert("🗑️ Registro de chuva excluído com sucesso!");
 };
 
 function exportarChuvasExcel(){
@@ -3409,13 +3457,24 @@ window.editarMaq = function(id){
 window.excluirMaq = function(id){
   var maq = maquinas.filter(function(m){ return m.id === id; })[0];
   if (!maq) return;
-  if (confirm("Deseja realmente apagar o cadastro de " + maq.nome + " e todo o seu histórico de lançamentos?")) {
-    maquinas = maquinas.filter(function(m){ return m.id !== id; });
-    lancamentos = lancamentos.filter(function(l){ return l.maq_id !== id; });
-    saveMaquinas();
-    saveLancamentos();
-    renderMaq();
+  if (!confirm("Deseja realmente apagar o cadastro de " + maq.nome + " e todo o seu histórico de lançamentos?")) {
+    return;
   }
+
+  maquinas = maquinas.filter(function(m){ return m.id !== id; });
+  lancamentos = lancamentos.filter(function(l){ return l.maq_id !== id; });
+  saveMaquinas();
+  saveLancamentos();
+  renderMaq();
+
+  // Deleta na nuvem Supabase imediatamente
+  if (navigator.onLine && authUser && authUser.id) {
+    var token = authUser.access_token || SUPABASE_KEY;
+    var hdrs = { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + token };
+    fetch(SUPABASE_URL + "/rest/v1/lancamentos?maq_id=eq." + id, { method: "DELETE", headers: hdrs }).catch(function(e){ console.error(e); });
+    fetch(SUPABASE_URL + "/rest/v1/maquinas?id=eq." + id, { method: "DELETE", headers: hdrs }).catch(function(e){ console.error(e); });
+  }
+  alert("🗑️ " + maq.nome + " e seus registros foram apagados com sucesso!");
 };
 
 // LANÇAMENTO DE HORÍMETRO / KM
@@ -3552,11 +3611,21 @@ $("btnSalvarLanc").onclick = function(){
 };
 
 window.excluirLanc = function(id){
-  if (confirm("Deseja apagar este registro de horímetro/km?")) {
-    lancamentos = lancamentos.filter(function(l){ return l.id !== id; });
-    saveLancamentos();
-    renderMaq();
+  if (!confirm("Deseja apagar este registro de horímetro/km?")) {
+    return;
   }
+
+  lancamentos = lancamentos.filter(function(l){ return l.id !== id; });
+  saveLancamentos();
+  renderMaq();
+
+  // Deleta na nuvem Supabase imediatamente
+  if (navigator.onLine && authUser && authUser.id) {
+    var token = authUser.access_token || SUPABASE_KEY;
+    var hdrs = { "apikey": SUPABASE_KEY, "Authorization": "Bearer " + token };
+    fetch(SUPABASE_URL + "/rest/v1/lancamentos?id=eq." + id, { method: "DELETE", headers: hdrs }).catch(function(e){ console.error(e); });
+  }
+  alert("🗑️ Registro apagado com sucesso!");
 };
 
 function exportarMaquinasExcel(){
