@@ -71,38 +71,145 @@
   }
 }
 *,*::before,*::after{box-sizing:inherit}
-html{scroll-padding-top:env(safe-area-inset-top,0px)}
-body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;max-width:760px;margin-inline:auto;padding:12px 12px 100px}
-header{display:flex;align-items:center;justify-content:space-between;margin:6px 0 14px}
-.logo{font-size:24px;font-weight:800;color:var(--ac);display:flex;align-items:center;gap:8px;letter-spacing:-0.5px}
-.sublogo{font-size:13px;color:var(--mut);font-weight:normal}
-h2{font-size:18px;margin:18px 0 8px;font-weight:700}
-h3{font-size:15px;margin:12px 0 6px;color:var(--mut);text-transform:uppercase;letter-spacing:0.5px}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%;max-width:100vw;overflow-x:hidden}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--tx);
+  font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  max-width:720px;
+  width:100%;
+  margin-inline:auto;
+  padding:10px 12px 100px;
+  overflow-x:hidden;
+}
 
-.tabs{display:flex;gap:5px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding:8px 0;z-index:20;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-.tabs button{flex:1;min-width:max-content;font-weight:600;font-size:14px;padding:8px 10px}
+header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin:4px 0 12px;
+  gap:8px;
+  flex-wrap:nowrap;
+}
+.logo{
+  font-size:20px;
+  font-weight:800;
+  color:var(--ac);
+  display:flex;
+  align-items:center;
+  gap:6px;
+  letter-spacing:-0.5px;
+  white-space:nowrap;
+}
+.sublogo{font-size:12px;color:var(--mut);font-weight:normal;white-space:nowrap}
+.header-actions{display:flex;gap:5px;align-items:center;flex-shrink:0}
+#btnAuth{
+  font-weight:700;
+  padding:6px 12px;
+  min-height:36px;
+  border-radius:99px;
+  max-width:150px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.btn-icon{
+  min-height:36px;
+  min-width:36px;
+  padding:0;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:99px;
+  font-size:15px;
+}
+
+h2{font-size:18px;margin:16px 0 8px;font-weight:700}
+h3{font-size:14px;margin:12px 0 6px;color:var(--mut);text-transform:uppercase;letter-spacing:0.5px}
+
+.tabs{
+  display:flex;
+  gap:4px;
+  position:sticky;
+  top:env(safe-area-inset-top,0px);
+  background:var(--bg);
+  padding:6px 0;
+  z-index:20;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{
+  flex:1 0 auto;
+  font-weight:600;
+  font-size:13px;
+  padding:8px 12px;
+  min-height:40px;
+  border-radius:10px;
+  white-space:nowrap;
+  border:1.5px solid var(--bd);
+}
+.tabs button.on{
+  background:var(--ac);
+  color:var(--acx);
+  border-color:var(--ac);
+  box-shadow:0 2px 8px rgba(13,136,73,0.25);
+}
+
 button,input,select,textarea{font:inherit;color:inherit}
-button{background:var(--card);border:2px solid var(--bd);border-radius:12px;padding:12px;min-height:48px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:0.15s ease}
-button:active{transform:scale(0.98)}
+button{
+  background:var(--card);
+  border:1.5px solid var(--bd);
+  border-radius:12px;
+  padding:10px 14px;
+  min-height:46px;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  transition:0.12s ease;
+  touch-action:manipulation;
+}
+button:active{transform:scale(0.97)}
 button.on,button.pri{background:var(--ac);color:var(--acx);border-color:var(--ac);font-weight:700}
 button.sec{background:var(--ac-light);color:var(--ac);border-color:var(--ac)}
 button.bad{border-color:var(--bad);color:var(--bad);background:transparent}
 button.bad-fill{background:var(--bad);color:#fff;border-color:var(--bad)}
-button.sm{min-height:36px;padding:6px 12px;font-size:13px;border-radius:8px}
+button.sm{min-height:34px;padding:5px 10px;font-size:13px;border-radius:8px}
 
-input,select,textarea{width:100%;background:var(--card);border:2px solid var(--bd);border-radius:10px;padding:11px 12px;min-height:46px}
-input:focus,select:focus,textarea:focus{border-color:var(--ac);outline:none}
+input,select,textarea{
+  width:100%;
+  background:var(--card);
+  border:1.5px solid var(--bd);
+  border-radius:10px;
+  padding:10px 12px;
+  min-height:44px;
+  font-size:15px;
+  -webkit-appearance:none;
+  appearance:none;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--ac);outline:none;box-shadow:0 0 0 3px rgba(13,136,73,0.15)}
 label{display:block;font-size:13px;font-weight:600;color:var(--mut);margin:10px 0 4px}
 
-.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin:9px 0;box-shadow:0 1px 3px rgba(0,0,0,0.02)}
+.card{
+  background:var(--card);
+  border:1px solid var(--bd);
+  border-radius:14px;
+  padding:14px;
+  margin:8px 0;
+  box-shadow:0 2px 6px rgba(0,0,0,0.03);
+}
 .card.highlight{border-left:4px solid var(--ac)}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
-.n{font-size:30px;font-weight:800;color:var(--ac);line-height:1}
-.mut{color:var(--mut);font-size:14px}
-.row{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:8px}
+.n{font-size:28px;font-weight:800;color:var(--ac);line-height:1}
+.mut{color:var(--mut);font-size:13px}
+.row{display:flex;justify-content:space-between;gap:8px;align-items:center}
 .clickable{cursor:pointer}
-.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
-.tag{font-size:12px;padding:3px 8px;border-radius:99px;border:1px solid var(--bd);color:var(--mut);display:inline-flex;align-items:center;gap:4px}
+.tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.tag{font-size:11px;padding:3px 8px;border-radius:99px;border:1px solid var(--bd);color:var(--mut);display:inline-flex;align-items:center;gap:4px;font-weight:600}
 .tag.morto{color:var(--bad);border-color:var(--bad);background:var(--bad-bg)}
 .tag.vendido{color:var(--warn);border-color:var(--warn);background:var(--warn-bg)}
 .tag.iatf{color:var(--blue);border-color:var(--blue);background:var(--blue-bg)}
@@ -110,18 +217,32 @@ label{display:block;font-size:13px;font-weight:600;color:var(--mut);margin:10px 
 
 .two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
-.bar{display:flex;gap:8px;margin-top:14px}.bar>*{flex:1}
-table{width:100%;border-collapse:collapse;font-size:14px}
+.bar{display:flex;gap:8px;margin-top:12px}.bar>*{flex:1}
+.table-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;margin:8px 0;border-radius:10px}
+table{width:100%;border-collapse:collapse;font-size:13px}
 td,th{padding:8px 6px;border-bottom:1px solid var(--bd);text-align:left}
 th{color:var(--mut);font-weight:600}
-pre{white-space:pre-wrap;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px;font:13px/1.45 ui-monospace,monospace}
-.box-section{background:var(--ac-light);border:1px dashed var(--ac);border-radius:12px;padding:12px;margin:12px 0}
+pre{white-space:pre-wrap;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px;font:12px/1.45 ui-monospace,monospace}
+.box-section{background:var(--ac-light);border:1px dashed var(--ac);border-radius:12px;padding:12px;margin:10px 0}
 .list-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd)}
 .list-item:last-child{border-bottom:none}
 [hidden]{display:none!important}
 
-.modal-backdrop{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.65);display:flex;align-items:center;justify-content:center;z-index:9999;padding:16px;backdrop-filter:blur(3px)}
-.modal-card{background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:14px;max-width:440px;width:100%;padding:20px;box-shadow:0 12px 35px rgba(0,0,0,0.3);max-height:90vh;overflow-y:auto}
+.modal-backdrop{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.65);display:flex;align-items:center;justify-content:center;z-index:9999;padding:12px;backdrop-filter:blur(3px)}
+.modal-card{background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:16px;max-width:440px;width:100%;padding:18px;box-shadow:0 12px 35px rgba(0,0,0,0.3);max-height:90vh;overflow-y:auto}
+
+@media (max-width: 540px) {
+  body{padding:6px 8px 90px}
+  .sublogo{display:none}
+  .logo{font-size:18px}
+  .two{grid-template-columns:1fr;gap:6px}
+  .three{grid-template-columns:1fr;gap:6px}
+  .grid{grid-template-columns:repeat(2,1fr);gap:6px}
+  .card{padding:12px;border-radius:12px;margin:6px 0}
+  .modal-card{padding:14px;border-radius:14px}
+  #btnAuth{max-width:120px;padding:4px 8px;font-size:12px}
+  .btn-icon{min-width:32px;min-height:32px;font-size:13px}
+}
 
 /* Estilos de Impressão e PDF */
 @media print{
@@ -139,11 +260,11 @@ pre{white-space:pre-wrap;background:var(--card);border:1px solid var(--bd);borde
     <div class="logo">🐂 GESTFAZ</div>
     <div class="sublogo">Controle e Manejo de Rebanho</div>
   </div>
-  <div style="display:flex;gap:6px;align-items:center">
-    <button id="btnAuth" class="sm sec" title="Minha Conta / Entrar / Sincronizar">👤 Entrar</button>
-    <button id="btnSyncNuvem" class="sm" title="Sincronizar com Banco de Dados na Nuvem (Supabase)">☁️ Nuvem</button>
-    <button id="btnTema" class="sm" title="Alternar Modo Claro / Escuro">🌙 Escuro</button>
-    <button id="btnSobre" class="sm" title="Ajuda">Ajuda</button>
+  <div class="header-actions">
+    <button id="btnAuth" class="sm sec" title="Minha Conta">👤 Entrar</button>
+    <button id="btnSyncNuvem" class="sm btn-icon" title="Sincronizar com Banco de Dados na Nuvem">☁️</button>
+    <button id="btnTema" class="sm btn-icon" title="Alternar Modo Claro / Escuro">🌙</button>
+    <button id="btnSobre" class="sm btn-icon" title="Ajuda / Sobre">❓</button>
   </div>
 </header>
 
@@ -159,11 +280,21 @@ pre{white-space:pre-wrap;background:var(--card);border:1px solid var(--bd);borde
 
     <!-- TELA 1: QUANDO ESTIVER LOGADO -->
     <div id="authViewLogado" hidden>
-      <div class="card" style="background:var(--ac-light);border:1px solid var(--ac);text-align:center;padding:16px">
-        <div style="font-size:32px;margin-bottom:6px">🤠</div>
-        <div style="font-weight:700;font-size:16px" id="authLogadoEmail">usuario@email.com</div>
-        <div class="mut" style="font-size:12px;margin-top:2px">Conta ativa e conectada à nuvem Supabase</div>
+      <div class="card" style="background:var(--ac-light);border:1px solid var(--ac);text-align:center;padding:14px">
+        <div style="font-size:30px;margin-bottom:4px">🤠</div>
+        <div style="font-weight:800;font-size:18px;color:var(--tx)" id="authLogadoNome">Produtor</div>
+        <div class="mut" style="font-size:13px;margin-top:2px" id="authLogadoEmail">usuario@email.com</div>
+        <div class="tag vacina" style="margin-top:8px">● Conectado à Nuvem Supabase</div>
       </div>
+
+      <div style="margin:14px 0">
+        <label style="margin-top:0">Seu Nome / Como deseja ser chamado no app:</label>
+        <div style="display:flex;gap:6px">
+          <input id="authEditNome" placeholder="Seu Nome Completo" style="min-height:38px;padding:6px 12px;font-size:14px">
+          <button id="btnSalvarNome" class="sm sec" type="button" style="white-space:nowrap">Salvar Nome</button>
+        </div>
+      </div>
+
       <div class="mut" style="font-size:13px;margin:12px 0">
         ✅ <b>Seus dados estão protegidos na nuvem:</b> ao trocar de celular ou acessar pelo computador, basta entrar com seu e-mail e senha para carregar automaticamente todo o seu rebanho e lançamentos!
       </div>
@@ -202,11 +333,13 @@ pre{white-space:pre-wrap;background:var(--card);border:1px solid var(--bd);borde
       <!-- PAINEL: CRIAR CONTA -->
       <div id="panelAuthSignup" hidden>
         <div class="mut" style="font-size:13px;margin-bottom:10px">Crie sua conta para proteger seus dados e sincronizar entre vários celulares.</div>
-        <label>Seu E-mail</label>
+        <label>Seu Nome Completo *</label>
+        <input id="signupNome" placeholder="Ex.: Bruno Santos" autocomplete="name">
+        <label>Seu E-mail *</label>
         <input id="signupEmail" type="email" placeholder="seuemail@exemplo.com" autocomplete="email">
-        <label>Criar Senha (mínimo 6 dígitos)</label>
+        <label>Criar Senha (mínimo 6 dígitos) *</label>
         <input id="signupPass" type="password" placeholder="Crie uma senha segura" autocomplete="new-password">
-        <label>Confirmar Senha</label>
+        <label>Confirmar Senha *</label>
         <input id="signupPassConf" type="password" placeholder="Repita a senha" autocomplete="new-password">
         <div class="bar">
           <button id="btnSignupSubmit" class="pri" type="button">Criar Conta Gratuita</button>
@@ -788,6 +921,25 @@ function $(id){ return document.getElementById(id); }
 function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
 
 function load(){
+  // Limpeza automática de dados de teste antigos
+  try {
+    if (!localStorage.getItem("gestfaz_v3_zerado")) {
+      var rawA = localStorage.getItem(KEY);
+      if (rawA && (rawA.includes("4019") || rawA.includes("Bez-3036") || rawA.includes("mwkv616pqicy"))) {
+        localStorage.removeItem(KEY);
+        localStorage.removeItem(KEY_ANTIGA);
+        localStorage.removeItem(KEY_CHUVAS);
+        localStorage.removeItem(KEY_MAQUINAS);
+        localStorage.removeItem(KEY_LANCS);
+        animais = [];
+        chuvas = [];
+        maquinas = [];
+        lancamentos = [];
+      }
+      localStorage.setItem("gestfaz_v3_zerado", "1");
+    }
+  } catch(e){}
+
   try {
     var r = localStorage.getItem(KEY);
     if (!r) {
@@ -835,15 +987,38 @@ try {
   if (sUser) authUser = JSON.parse(sUser);
 } catch(e){}
 
+function getNomeUsuario(u) {
+  if (!u) return "";
+  if (u.user_metadata) {
+    if (u.user_metadata.nome) return u.user_metadata.nome;
+    if (u.user_metadata.full_name) return u.user_metadata.full_name;
+    if (u.user_metadata.name) return u.user_metadata.name;
+  }
+  if (u.nome) return u.nome;
+  if (u.full_name) return u.full_name;
+  if (u.email && u.email.toLowerCase().includes("brunosantos")) return "Bruno Santos";
+  if (u.email) {
+    var prefix = u.email.split("@")[0].replace(/[0-9_.-]+/g, " ").trim();
+    if (prefix) {
+      return prefix.split(" ").map(function(w){
+        return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
+      }).join(" ");
+    }
+    return u.email.split("@")[0];
+  }
+  return "Produtor";
+}
+
 function atualizarBotaoAuth(){
   var btn = $("btnAuth");
   if (!btn) return;
-  if (authUser && authUser.email) {
-    var nomeCurto = authUser.email.split("@")[0];
-    btn.innerHTML = "👤 " + esc(nomeCurto);
+  if (authUser && (authUser.email || authUser.id)) {
+    var nomeCompleto = getNomeUsuario(authUser);
+    var primeiroNome = nomeCompleto.split(" ")[0] || "Produtor";
+    btn.innerHTML = "👤 " + esc(primeiroNome);
     btn.classList.add("pri");
     btn.classList.remove("sec");
-    btn.title = "Conta: " + authUser.email;
+    btn.title = "Conta: " + nomeCompleto + " (" + (authUser.email || "") + ")";
   } else {
     btn.innerHTML = "👤 Entrar";
     btn.classList.remove("pri");
@@ -855,11 +1030,14 @@ function atualizarBotaoAuth(){
 function abrirModalAuth(){
   $("authModal").hidden = false;
   $("authMsg").textContent = "";
-  if (authUser && authUser.email) {
+  if (authUser && (authUser.email || authUser.id)) {
+    var nomeCompleto = getNomeUsuario(authUser);
     $("authModalTit").textContent = "👤 Minha Conta";
     $("authViewLogado").hidden = false;
     $("authViewDeslogado").hidden = true;
-    $("authLogadoEmail").textContent = authUser.email;
+    $("authLogadoNome").textContent = nomeCompleto;
+    $("authLogadoEmail").textContent = authUser.email || "";
+    if ($("authEditNome")) $("authEditNome").value = nomeCompleto;
   } else {
     $("authModalTit").textContent = "👤 Acessar / Criar Conta";
     $("authViewLogado").hidden = true;
@@ -874,6 +1052,40 @@ function fecharModalAuth(){
 
 $("btnAuth").onclick = abrirModalAuth;
 $("btnFecharAuth").onclick = fecharModalAuth;
+
+// Salvar Nome
+if ($("btnSalvarNome")) {
+  $("btnSalvarNome").onclick = async function(){
+    var novoNome = $("authEditNome").value.trim();
+    if (!novoNome) {
+      alert("Por favor, digite seu nome.");
+      return;
+    }
+    if (!authUser) return;
+    authUser.nome = novoNome;
+    if (!authUser.user_metadata) authUser.user_metadata = {};
+    authUser.user_metadata.nome = novoNome;
+    authUser.user_metadata.full_name = novoNome;
+    try { localStorage.setItem(KEY_AUTH_USER, JSON.stringify(authUser)); } catch(e){}
+    atualizarBotaoAuth();
+    $("authLogadoNome").textContent = novoNome;
+
+    // Atualiza metadata no Supabase se houver token
+    try {
+      var token = authUser.access_token || SUPABASE_KEY;
+      await fetch(SUPABASE_URL + "/auth/v1/user", {
+        method: "PUT",
+        headers: {
+          "apikey": SUPABASE_KEY,
+          "Authorization": "Bearer " + token,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ data: { nome: novoNome, full_name: novoNome } })
+      });
+    } catch(e){}
+    alert("✅ Nome atualizado com sucesso!");
+  };
+}
 
 // Abas de Auth
 $("tabAuthLogin").onclick = function(){
@@ -939,7 +1151,8 @@ $("btnLoginSubmit").onclick = async function(){
     msg.innerHTML = '<span style="color:var(--ac)">✅ Conectado com sucesso!</span>';
     atualizarBotaoAuth();
     fecharModalAuth();
-    setSyncMsg("✅ Bem-vindo, " + authUser.email + "! Sincronizando dados...", false);
+    var nomeDisplay = getNomeUsuario(authUser);
+    setSyncMsg("✅ Bem-vindo de volta, " + nomeDisplay + "! Sincronizando dados...", false);
     sincronizarNuvem(false);
   } catch(err) {
     msg.innerHTML = '<span style="color:var(--bad)">❌ Erro de conexão com a internet.</span>';
@@ -948,10 +1161,15 @@ $("btnLoginSubmit").onclick = async function(){
 
 // Criar Conta
 $("btnSignupSubmit").onclick = async function(){
+  var nome = ($("signupNome") ? $("signupNome").value.trim() : "");
   var email = $("signupEmail").value.trim();
   var pass = $("signupPass").value;
   var conf = $("signupPassConf").value;
   var msg = $("authMsg");
+  if (!nome) {
+    msg.innerHTML = '<span style="color:var(--bad)">Por favor, informe seu nome completo.</span>';
+    return;
+  }
   if (!email || !pass) {
     msg.innerHTML = '<span style="color:var(--bad)">Por favor, informe e-mail e senha.</span>';
     return;
@@ -972,23 +1190,47 @@ $("btnSignupSubmit").onclick = async function(){
         "apikey": SUPABASE_KEY,
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ email: email, password: pass })
+      body: JSON.stringify({
+        email: email,
+        password: pass,
+        data: {
+          nome: nome,
+          full_name: nome
+        }
+      })
     });
     var data = await res.json();
     if (!res.ok) {
       msg.innerHTML = '<span style="color:var(--bad)">❌ ' + esc(data.msg || data.error_description || "Erro ao criar conta.") + '</span>';
       return;
     }
+
+    // ZERA OS DADOS PARA COMEÇAR O APP 100% LIMPO!
+    animais = [];
+    chuvas = [];
+    maquinas = [];
+    lancamentos = [];
+    try {
+      localStorage.removeItem(KEY);
+      localStorage.removeItem(KEY_ANTIGA);
+      localStorage.removeItem(KEY_CHUVAS);
+      localStorage.removeItem(KEY_MAQUINAS);
+      localStorage.removeItem(KEY_LANCS);
+    } catch(e){}
+    renderReb();
+    if (typeof renderMaq === "function") renderMaq();
+    if (typeof renderPluv === "function") renderPluv();
+
     if (data.session && data.session.user) {
       authUser = data.session.user;
+      if (!authUser.nome) authUser.nome = nome;
       if (data.session.access_token) authUser.access_token = data.session.access_token;
       localStorage.setItem(KEY_AUTH_USER, JSON.stringify(authUser));
       atualizarBotaoAuth();
       fecharModalAuth();
-      sincronizarNuvem(false);
-      alert("✅ Conta criada com sucesso! Seus dados agora estão protegidos na sua conta.");
+      alert("✅ Bem-vindo, " + nome + "!\nSua conta foi criada com sucesso e seu aplicativo está pronto para uso.");
     } else {
-      msg.innerHTML = '<span style="color:var(--ac)">✅ Conta criada com sucesso! Você já pode entrar com seu e-mail e senha.</span>';
+      msg.innerHTML = '<span style="color:var(--ac)">✅ Conta criada com sucesso! Faça login com seu e-mail e senha.</span>';
       alert("✅ Conta criada com sucesso!\n\nAgora basta clicar na aba 'Entrar' e acessar com seu e-mail e senha.");
       $("tabAuthLogin").click();
       $("loginEmail").value = email;
@@ -1038,9 +1280,23 @@ $("btnAuthLogout").onclick = function(){
   if (confirm("Deseja realmente sair da sua conta neste aparelho?")) {
     authUser = null;
     localStorage.removeItem(KEY_AUTH_USER);
+    animais = [];
+    chuvas = [];
+    maquinas = [];
+    lancamentos = [];
+    try {
+      localStorage.removeItem(KEY);
+      localStorage.removeItem(KEY_ANTIGA);
+      localStorage.removeItem(KEY_CHUVAS);
+      localStorage.removeItem(KEY_MAQUINAS);
+      localStorage.removeItem(KEY_LANCS);
+    } catch(e){}
     atualizarBotaoAuth();
     fecharModalAuth();
-    setSyncMsg("Você saiu da conta. Os dados salvos continuam disponíveis no aparelho.", false);
+    renderReb();
+    if (typeof renderMaq === "function") renderMaq();
+    if (typeof renderPluv === "function") renderPluv();
+    setSyncMsg("Você saiu da conta.", false);
   }
 };
 
@@ -1071,8 +1327,22 @@ $("btnAuthDeleteAccount").onclick = async function(){
 
   authUser = null;
   localStorage.removeItem(KEY_AUTH_USER);
+  animais = [];
+  chuvas = [];
+  maquinas = [];
+  lancamentos = [];
+  try {
+    localStorage.removeItem(KEY);
+    localStorage.removeItem(KEY_ANTIGA);
+    localStorage.removeItem(KEY_CHUVAS);
+    localStorage.removeItem(KEY_MAQUINAS);
+    localStorage.removeItem(KEY_LANCS);
+  } catch(e){}
   atualizarBotaoAuth();
   fecharModalAuth();
+  renderReb();
+  if (typeof renderMaq === "function") renderMaq();
+  if (typeof renderPluv === "function") renderPluv();
   setSyncMsg("Conta excluída permanentemente.", false);
   alert("✅ Sua conta foi excluída com sucesso.");
 };
@@ -1080,68 +1350,46 @@ $("btnAuthDeleteAccount").onclick = async function(){
 var isSyncing = false;
 
 function setSyncMsg(msg, isErr){
-  var el = $("syncStatusBanner");
-  if (!el) return;
-  el.hidden = false;
-  el.style.background = isErr ? "var(--bad-bg)" : "var(--ac-light)";
-  el.style.color = isErr ? "var(--bad)" : "var(--tx)";
-  el.innerHTML = msg;
-  clearTimeout(window._syncMsgTimer);
-  window._syncMsgTimer = setTimeout(function(){ el.hidden = true; }, 5000);
-}
-
-function triggerAutoSync(){
-  clearTimeout(window._syncDebounce);
-  window._syncDebounce = setTimeout(function(){
-    if (navigator.onLine) sincronizarNuvem(true);
-  }, 2500);
-}
-
-function save(){
-  try {
-    localStorage.setItem(KEY, JSON.stringify(animais));
-    triggerAutoSync();
-  } catch(e){}
-}
-
-function saveChuvas(){
-  try {
-    localStorage.setItem(KEY_CHUVAS, JSON.stringify(chuvas));
-    triggerAutoSync();
-  } catch(e){}
-}
-
-function saveMaquinas(){
-  try {
-    localStorage.setItem(KEY_MAQUINAS, JSON.stringify(maquinas));
-    triggerAutoSync();
-  } catch(e){}
-}
-
-function saveLancamentos(){
-  try {
-    localStorage.setItem(KEY_LANCS, JSON.stringify(lancamentos));
-    triggerAutoSync();
-  } catch(e){}
+  var banner = $("syncStatusBanner");
+  if (!banner) return;
+  banner.textContent = msg;
+  banner.hidden = false;
+  banner.style.color = isErr ? "var(--bad)" : "var(--tx)";
+  banner.style.background = isErr ? "var(--bad-bg)" : "var(--ac-light)";
+  setTimeout(function(){
+    banner.hidden = true;
+  }, 4500);
 }
 
 async function sincronizarNuvem(silencioso){
   if (isSyncing) return;
   if (!navigator.onLine) {
-    if (!silencioso) alert("📴 Dispositivo sem conexão com a internet no momento.\n\nSeus dados estão 100% salvos no aparelho e serão sincronizados com a nuvem Supabase assim que você tiver conexão.");
+    if (!silencioso) alert("⚠️ Sem conexão com a internet. Os dados continuam salvos no seu aparelho.");
+    setSyncMsg("⚠️ Sem conexão com a internet.", true);
     return;
   }
+
+  var syncBtn = $("btnSyncNuvem");
   isSyncing = true;
-  if ($("btnSyncNuvem")) $("btnSyncNuvem").textContent = "⏳ Sincronizando...";
+  if (syncBtn) {
+    syncBtn.innerHTML = "⏳";
+    syncBtn.disabled = true;
+  }
+  setSyncMsg("☁️ Sincronizando com a nuvem Supabase...", false);
 
   try {
+    var token = (authUser && authUser.access_token) ? authUser.access_token : SUPABASE_KEY;
     var headers = {
       "apikey": SUPABASE_KEY,
-      "Authorization": "Bearer " + SUPABASE_KEY,
+      "Authorization": "Bearer " + token,
       "Content-Type": "application/json"
     };
 
     var uid = (authUser && authUser.id) ? authUser.id : null;
+    if (!uid) {
+      setSyncMsg("Entre na sua conta para sincronizar com a nuvem.", false);
+      return;
+    }
 
     // 1. Enviar animais locais
     if (animais.length > 0) {
@@ -1178,19 +1426,13 @@ async function sincronizarNuvem(silencioso){
       });
     }
 
-    // Baixar animais da nuvem
-    var urlBuscaAnimais = uid 
-      ? (SUPABASE_URL + "/rest/v1/animais?or=(user_id.eq." + uid + ",user_id.is.null)&select=*")
-      : (SUPABASE_URL + "/rest/v1/animais?select=*");
-
+    // Baixar animais da nuvem (APENAS do usuário logado!)
+    var urlBuscaAnimais = SUPABASE_URL + "/rest/v1/animais?user_id=eq." + uid + "&select=*";
     var resAnimais = await fetch(urlBuscaAnimais, { headers: headers });
     if (resAnimais.ok) {
       var nuvemAnimais = await resAnimais.json();
-      if (Array.isArray(nuvemAnimais) && nuvemAnimais.length > 0) {
-        var mapa = {};
-        nuvemAnimais.forEach(function(a){ mapa[a.id] = a; });
-        animais.forEach(function(a){ mapa[a.id] = a; });
-        animais = Object.values(mapa);
+      if (Array.isArray(nuvemAnimais)) {
+        animais = nuvemAnimais;
         try { localStorage.setItem(KEY, JSON.stringify(animais)); } catch(e){}
       }
     }
@@ -1213,18 +1455,12 @@ async function sincronizarNuvem(silencioso){
         body: JSON.stringify(payloadChuvas)
       });
     }
-    var urlBuscaChuvas = uid 
-      ? (SUPABASE_URL + "/rest/v1/chuvas?or=(user_id.eq." + uid + ",user_id.is.null)&select=*")
-      : (SUPABASE_URL + "/rest/v1/chuvas?select=*");
-
+    var urlBuscaChuvas = SUPABASE_URL + "/rest/v1/chuvas?user_id=eq." + uid + "&select=*";
     var resChuvas = await fetch(urlBuscaChuvas, { headers: headers });
     if (resChuvas.ok) {
       var nuvemChuvas = await resChuvas.json();
-      if (Array.isArray(nuvemChuvas) && nuvemChuvas.length > 0) {
-        var mapaC = {};
-        nuvemChuvas.forEach(function(c){ mapaC[c.id] = c; });
-        chuvas.forEach(function(c){ mapaC[c.id] = c; });
-        chuvas = Object.values(mapaC);
+      if (Array.isArray(nuvemChuvas)) {
+        chuvas = nuvemChuvas;
         try { localStorage.setItem(KEY_CHUVAS, JSON.stringify(chuvas)); } catch(e){}
       }
     }
@@ -1249,18 +1485,12 @@ async function sincronizarNuvem(silencioso){
         body: JSON.stringify(payloadMaq)
       });
     }
-    var urlBuscaMaq = uid 
-      ? (SUPABASE_URL + "/rest/v1/maquinas?or=(user_id.eq." + uid + ",user_id.is.null)&select=*")
-      : (SUPABASE_URL + "/rest/v1/maquinas?select=*");
-
+    var urlBuscaMaq = SUPABASE_URL + "/rest/v1/maquinas?user_id=eq." + uid + "&select=*";
     var resMaq = await fetch(urlBuscaMaq, { headers: headers });
     if (resMaq.ok) {
       var nuvemMaq = await resMaq.json();
-      if (Array.isArray(nuvemMaq) && nuvemMaq.length > 0) {
-        var mapaM = {};
-        nuvemMaq.forEach(function(m){ mapaM[m.id] = m; });
-        maquinas.forEach(function(m){ mapaM[m.id] = m; });
-        maquinas = Object.values(mapaM);
+      if (Array.isArray(nuvemMaq)) {
+        maquinas = nuvemMaq;
         try { localStorage.setItem(KEY_MAQUINAS, JSON.stringify(maquinas)); } catch(e){}
       }
     }
@@ -1290,18 +1520,12 @@ async function sincronizarNuvem(silencioso){
         body: JSON.stringify(payloadLancs)
       });
     }
-    var urlBuscaLancs = uid 
-      ? (SUPABASE_URL + "/rest/v1/lancamentos?or=(user_id.eq." + uid + ",user_id.is.null)&select=*")
-      : (SUPABASE_URL + "/rest/v1/lancamentos?select=*");
-
+    var urlBuscaLancs = SUPABASE_URL + "/rest/v1/lancamentos?user_id=eq." + uid + "&select=*";
     var resLancs = await fetch(urlBuscaLancs, { headers: headers });
     if (resLancs.ok) {
       var nuvemLancs = await resLancs.json();
-      if (Array.isArray(nuvemLancs) && nuvemLancs.length > 0) {
-        var mapaL = {};
-        nuvemLancs.forEach(function(l){ mapaL[l.id] = l; });
-        lancamentos.forEach(function(l){ mapaL[l.id] = l; });
-        lancamentos = Object.values(mapaL);
+      if (Array.isArray(nuvemLancs)) {
+        lancamentos = nuvemLancs;
         try { localStorage.setItem(KEY_LANCS, JSON.stringify(lancamentos)); } catch(e){}
       }
     }
@@ -1318,9 +1542,13 @@ async function sincronizarNuvem(silencioso){
     setSyncMsg("⚠️ Modo offline: dados salvos localmente.", true);
   } finally {
     isSyncing = false;
-    if ($("btnSyncNuvem")) $("btnSyncNuvem").textContent = "☁️ Nuvem";
+    if (syncBtn) {
+      syncBtn.innerHTML = "☁️";
+      syncBtn.disabled = false;
+    }
   }
 }
+
 
 function hoje(){
   var d = new Date();
