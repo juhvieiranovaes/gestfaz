@@ -446,7 +446,7 @@ pre{white-space:pre-wrap;background:var(--card);border:1px solid var(--bd);borde
       <button id="btnAbrirMoverPasto" class="sm sec" type="button">🔄 Mover de Pasto</button>
     </div>
   </div>
-  <div class="mut" style="margin-bottom:8px">Gerencie a lotação da fazenda e toque no pasto para filtrar os animais:</div>
+  <div class="mut" style="margin-bottom:8px">Toque no pasto para filtrar os animais:</div>
 
   <!-- CAIXA DE CADASTRO/EDIÇÃO DE PASTO -->
   <div id="boxCadPasto" class="card highlight" hidden style="margin:12px 0;background:var(--card);border:2px solid #2e7d32">
@@ -454,32 +454,10 @@ pre{white-space:pre-wrap;background:var(--card);border:1px solid var(--bd);borde
       <b id="titBoxCadPasto" style="font-size:16px;color:#2e7d32">🌿 Cadastrar Novo Pasto / Piquete</b>
       <button id="btnFecharCadPasto" class="sm bad" type="button" style="min-height:30px;padding:2px 8px">✕ Fechar</button>
     </div>
-    <div class="mut" style="margin:4px 0 10px">Cadastre o pasto para poder vincular as cabeças de gado e monitorar a capacidade:</div>
+    <div class="mut" style="margin:4px 0 10px">Informe o nome do pasto ou piquete para vincular aos animais:</div>
     <input type="hidden" id="pasto_edit_id">
     <label style="margin-top:0">Nome do Pasto / Piquete *</label>
-    <input id="pasto_nome" placeholder="Ex.: Pasto da Represa, Piquete 1, Confinamento, Retiro">
-    
-    <div class="two" style="margin-top:8px">
-      <div>
-        <label>Capacidade (cabeças)</label>
-        <input id="pasto_capacidade" type="number" inputmode="numeric" placeholder="Ex.: 60">
-      </div>
-      <div>
-        <label>Área (hectares)</label>
-        <input id="pasto_area" type="number" step="0.1" inputmode="decimal" placeholder="Ex.: 25">
-      </div>
-    </div>
-    
-    <div class="two" style="margin-top:8px">
-      <div>
-        <label>Tipo de Capim / Forrageira</label>
-        <input id="pasto_capim" placeholder="Ex.: Brachiaria, Mombaça, Tifton">
-      </div>
-      <div>
-        <label>Observações</label>
-        <input id="pasto_obs" placeholder="Ex.: Bebedouro novo, sombra nativa, cocho coberto">
-      </div>
-    </div>
+    <input id="pasto_nome" placeholder="Ex.: Pasto 1, Pasto da Represa, Piquete 2, Retiro">
 
     <div class="bar" style="margin-top:12px;display:flex;gap:8px">
       <button id="btnSalvarPasto" class="pri" type="button" style="background:#2e7d32">💾 Salvar Pasto</button>
@@ -1616,11 +1594,7 @@ async function sincronizarNuvem(silencioso){
         return {
           id: String(p.id),
           user_id: uid,
-          nome: String(p.nome),
-          capacidade: p.capacidade ? parseInt(p.capacidade) : null,
-          area_ha: p.area_ha ? parseFloat(p.area_ha) : null,
-          tipo_capim: p.tipo_capim || null,
-          obs: p.obs || null
+          nome: String(p.nome)
         };
       });
       await fetch(SUPABASE_URL + "/rest/v1/pastos", {
@@ -1813,48 +1787,26 @@ function renderReb(){
     pastosHtml += '<div class="card" style="text-align:center;padding:20px;border:1px dashed var(--bdr);margin-bottom:12px">' +
       '<div style="font-size:28px;margin-bottom:6px">🌿</div>' +
       '<b style="font-size:15px;color:var(--tx)">Nenhum pasto cadastrado ainda</b>' +
-      '<div class="mut" style="font-size:13px;margin:6px auto 14px;max-width:360px">Crie seus pastos ou piquetes para organizar as cabeças de gado por lote e acompanhar a lotação.</div>' +
+      '<div class="mut" style="font-size:13px;margin:6px auto 14px;max-width:360px">Crie seus pastos ou piquetes para organizar as cabeças de gado.</div>' +
       '<button type="button" class="pri sm" id="btnCriarPrimeiroPasto" style="background:#2e7d32;display:inline-block;padding:8px 16px">🌿 + Cadastrar Primeiro Pasto</button>' +
     '</div>';
   } else {
-    pastosHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));gap:10px;margin-bottom:12px">';
+    pastosHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));gap:10px;margin-bottom:12px">';
     
     todosNomesPastos.forEach(function(nomeP){
       var pObj = mapaPastos[nomeP] || { id: null, nome: nomeP };
       var qtd = lt[nomeP] || 0;
       var isSel = (pastoSel === nomeP);
-      
-      var detalhes = [];
-      if (pObj.area_ha) detalhes.push(pObj.area_ha + " ha");
-      if (pObj.tipo_capim) detalhes.push(esc(pObj.tipo_capim));
-      var subTxt = detalhes.join(" • ");
 
-      var lotacaoTxt = qtd + " cab";
-      var badgeCap = "";
-      if (pObj.capacidade && pObj.capacidade > 0) {
-        var pct = Math.round((qtd / pObj.capacidade) * 100);
-        lotacaoTxt = qtd + " / " + pObj.capacidade + " cab";
-        var corLot = pct > 100 ? "#c62828" : (pct >= 85 ? "#ef6c00" : "#2e7d32");
-        badgeCap = '<span style="font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px;background:' + corLot + '15;color:' + corLot + '">' + pct + '% lotado</span>';
-      }
-
-      pastosHtml += '<div class="card pasture-card" data-p="' + esc(nomeP) + '" style="cursor:pointer;margin:0;transition:all .15s ease;' + (isSel ? 'border:2px solid var(--ac);background:var(--ac-light);box-shadow:0 0 0 1px var(--ac);' : '') + '">' +
-        '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">' +
+      pastosHtml += '<div class="card pasture-card" data-p="' + esc(nomeP) + '" style="cursor:pointer;margin:0;padding:12px 14px;transition:all .15s ease;' + (isSel ? 'border:2px solid var(--ac);background:var(--ac-light);box-shadow:0 0 0 1px var(--ac);' : '') + '">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">' +
           '<div style="flex:1">' +
             '<div style="font-weight:800;font-size:15px;color:var(--tx)">🌿 ' + esc(nomeP) + (isSel ? ' <span style="font-size:11px;color:var(--ac);font-weight:700">(Filtrado)</span>' : '') + '</div>' +
-            (subTxt ? '<div class="mut" style="font-size:12px;margin-top:3px">' + subTxt + '</div>' : '') +
-            (pObj.obs ? '<div class="mut" style="font-size:11px;margin-top:2px;font-style:italic">' + esc(pObj.obs) + '</div>' : '') +
           '</div>' +
-          '<div style="display:flex;gap:4px">' +
-            (pObj.id ? '<button type="button" class="sm sec btn-edit-pasto" data-id="' + esc(pObj.id) + '" title="Editar Pasto" style="padding:2px 7px;font-size:12px;min-height:28px">✏️</button>' : '') +
-            (pObj.id ? '<button type="button" class="sm bad btn-del-pasto" data-id="' + esc(pObj.id) + '" title="Excluir Pasto" style="padding:2px 7px;font-size:12px;min-height:28px">🗑️</button>' : '') +
-          '</div>' +
-        '</div>' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid var(--bdr)">' +
-          '<span style="font-size:13px;color:var(--mut)">' + (qtd === 0 ? '<span style="color:#2e7d32;font-weight:600">Livre (0 animais)</span>' : 'Ocupação:') + '</span>' +
           '<div style="display:flex;align-items:center;gap:6px">' +
-            '<span class="n" style="font-size:18px;font-weight:700">' + lotacaoTxt + '</span>' +
-            badgeCap +
+            '<span class="n" style="font-size:20px;font-weight:700">' + qtd + '</span> <span class="mut" style="font-size:13px">cab</span>' +
+            (pObj.id ? '<button type="button" class="sm sec btn-edit-pasto" data-id="' + esc(pObj.id) + '" title="Editar Nome do Pasto" style="padding:2px 7px;font-size:12px;min-height:28px;margin-left:4px">✏️</button>' : '') +
+            (pObj.id ? '<button type="button" class="sm bad btn-del-pasto" data-id="' + esc(pObj.id) + '" title="Excluir Pasto" style="padding:2px 7px;font-size:12px;min-height:28px">🗑️</button>' : '') +
           '</div>' +
         '</div>' +
       '</div>';
@@ -1863,13 +1815,10 @@ function renderReb(){
     // Se houver animais sem pasto informado
     if (lt["Sem pasto"] && lt["Sem pasto"] > 0) {
       var isSelSemPasto = (pastoSel === "Sem pasto");
-      pastosHtml += '<div class="card pasture-card" data-p="Sem pasto" style="cursor:pointer;margin:0;' + (isSelSemPasto ? 'border:2px solid var(--ac);background:var(--ac-light);' : 'background:#fff8e1;border:1px dashed #ffa000;') + '">' +
+      pastosHtml += '<div class="card pasture-card" data-p="Sem pasto" style="cursor:pointer;margin:0;padding:12px 14px;' + (isSelSemPasto ? 'border:2px solid var(--ac);background:var(--ac-light);' : 'background:#fff8e1;border:1px dashed #ffa000;') + '">' +
         '<div style="display:flex;justify-content:space-between;align-items:center">' +
-          '<div>' +
-            '<div style="font-weight:800;font-size:14px;color:#d84315">⚠️ Sem Pasto Definido' + (isSelSemPasto ? ' (Filtrado)' : '') + '</div>' +
-            '<div class="mut" style="font-size:12px;margin-top:2px">Animais sem lote/pasto no cadastro</div>' +
-          '</div>' +
-          '<span class="n" style="font-size:18px;font-weight:700;color:#d84315">' + lt["Sem pasto"] + ' cab</span>' +
+          '<div style="font-weight:800;font-size:14px;color:#d84315">⚠️ Sem Pasto Definido' + (isSelSemPasto ? ' (Filtrado)' : '') + '</div>' +
+          '<div><span class="n" style="font-size:20px;font-weight:700;color:#d84315">' + lt["Sem pasto"] + '</span> <span class="mut" style="font-size:13px;color:#d84315">cab</span></div>' +
         '</div>' +
       '</div>';
     }
@@ -2021,10 +1970,6 @@ function abrirCadPasto(){
   $("titBoxCadPasto").textContent = "🌿 Cadastrar Novo Pasto / Piquete";
   $("pasto_edit_id").value = "";
   $("pasto_nome").value = "";
-  $("pasto_capacidade").value = "";
-  $("pasto_area").value = "";
-  $("pasto_capim").value = "";
-  $("pasto_obs").value = "";
   setTimeout(function(){ $("pasto_nome").focus(); }, 100);
   box.scrollIntoView({ behavior: "smooth", block: "center" });
 }
@@ -2039,16 +1984,12 @@ function fecharCadPasto(){
 function salvarPasto(){
   var nome = $("pasto_nome").value.trim();
   if (!nome) {
-    alert("❌ Por favor, digite o nome do pasto ou piquete.\nEx.: Pasto da Represa, Piquete 1, Confinamento");
+    alert("❌ Por favor, digite o nome do pasto ou piquete.\nEx.: Pasto 1, Pasto da Represa, Piquete 2");
     $("pasto_nome").focus();
     return;
   }
 
   var editId = $("pasto_edit_id").value;
-  var cap = $("pasto_capacidade").value.trim();
-  var area = $("pasto_area").value.trim();
-  var capim = $("pasto_capim").value.trim();
-  var obs = $("pasto_obs").value.trim();
 
   // Verifica duplicidade de nome
   var dup = pastosList.some(function(p){
@@ -2065,10 +2006,6 @@ function salvarPasto(){
     if (p) {
       var nomeAntigo = p.nome;
       p.nome = nome;
-      p.capacidade = cap ? parseInt(cap) : null;
-      p.area_ha = area ? parseFloat(area) : null;
-      p.tipo_capim = capim || null;
-      p.obs = obs || null;
 
       // Se renomeou o pasto, atualiza os animais pertencentes
       if (nomeAntigo !== nome) {
@@ -2087,11 +2024,7 @@ function salvarPasto(){
     var novo = {
       id: "pasto_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
       user_id: (authUser && authUser.id) ? authUser.id : null,
-      nome: nome,
-      capacidade: cap ? parseInt(cap) : null,
-      area_ha: area ? parseFloat(area) : null,
-      tipo_capim: capim || null,
-      obs: obs || null
+      nome: nome
     };
     pastosList.push(novo);
   }
@@ -2108,13 +2041,9 @@ function editarPasto(id){
 
   var box = $("boxCadPasto");
   box.hidden = false;
-  $("titBoxCadPasto").textContent = "✏️ Editar Pasto: " + p.nome;
+  $("titBoxCadPasto").textContent = "✏️ Editar Nome do Pasto";
   $("pasto_edit_id").value = p.id;
   $("pasto_nome").value = p.nome || "";
-  $("pasto_capacidade").value = (p.capacidade != null ? p.capacidade : "");
-  $("pasto_area").value = (p.area_ha != null ? p.area_ha : "");
-  $("pasto_capim").value = p.tipo_capim || "";
-  $("pasto_obs").value = p.obs || "";
   setTimeout(function(){ $("pasto_nome").focus(); }, 100);
   box.scrollIntoView({ behavior: "smooth", block: "center" });
 }
