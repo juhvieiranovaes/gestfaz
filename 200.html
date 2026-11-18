@@ -454,10 +454,18 @@ pre{white-space:pre-wrap;background:var(--card);border:1px solid var(--bd);borde
       <b id="titBoxCadPasto" style="font-size:16px;color:#2e7d32">🌿 Cadastrar Novo Pasto / Piquete</b>
       <button id="btnFecharCadPasto" class="sm bad" type="button" style="min-height:30px;padding:2px 8px">✕ Fechar</button>
     </div>
-    <div class="mut" style="margin:4px 0 10px">Informe o nome do pasto ou piquete para vincular aos animais:</div>
+    <div class="mut" style="margin:4px 0 10px">Informe o nome do pasto e a quantidade de cabeças:</div>
     <input type="hidden" id="pasto_edit_id">
-    <label style="margin-top:0">Nome do Pasto / Piquete *</label>
-    <input id="pasto_nome" placeholder="Ex.: Pasto 1, Pasto da Represa, Piquete 2, Retiro">
+    <div class="two">
+      <div>
+        <label style="margin-top:0">Nome do Pasto / Piquete *</label>
+        <input id="pasto_nome" placeholder="Ex.: Pasto 1, Pasto da Represa, Retiro">
+      </div>
+      <div>
+        <label style="margin-top:0">Quantidade de Cabeças *</label>
+        <input id="pasto_qtd" type="number" inputmode="numeric" placeholder="Ex.: 30">
+      </div>
+    </div>
 
     <div class="bar" style="margin-top:12px;display:flex;gap:8px">
       <button id="btnSalvarPasto" class="pri" type="button" style="background:#2e7d32">💾 Salvar Pasto</button>
@@ -1594,7 +1602,8 @@ async function sincronizarNuvem(silencioso){
         return {
           id: String(p.id),
           user_id: uid,
-          nome: String(p.nome)
+          nome: String(p.nome),
+          quantidade: p.quantidade ? parseInt(p.quantidade, 10) : 0
         };
       });
       await fetch(SUPABASE_URL + "/rest/v1/pastos", {
@@ -1794,8 +1803,12 @@ function renderReb(){
     pastosHtml += '<div style="display:grid;grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));gap:10px;margin-bottom:12px">';
     
     todosNomesPastos.forEach(function(nomeP){
-      var pObj = mapaPastos[nomeP] || { id: null, nome: nomeP };
-      var qtd = lt[nomeP] || 0;
+      var pObj = mapaPastos[nomeP] || { id: null, nome: nomeP, quantidade: 0 };
+      var qtdIndiv = lt[nomeP] || 0;
+      // Quantidade total: usa a quantidade cadastrada no pasto, ou a contagem de animais individuais (a maior)
+      var qtdFinal = (pObj.quantidade != null && pObj.quantidade !== "") ? parseInt(pObj.quantidade, 10) : 0;
+      if (qtdIndiv > qtdFinal) qtdFinal = qtdIndiv;
+
       var isSel = (pastoSel === nomeP);
 
       pastosHtml += '<div class="card pasture-card" data-p="' + esc(nomeP) + '" style="cursor:pointer;margin:0;padding:12px 14px;transition:all .15s ease;' + (isSel ? 'border:2px solid var(--ac);background:var(--ac-light);box-shadow:0 0 0 1px var(--ac);' : '') + '">' +
@@ -1804,8 +1817,8 @@ function renderReb(){
             '<div style="font-weight:800;font-size:15px;color:var(--tx)">🌿 ' + esc(nomeP) + (isSel ? ' <span style="font-size:11px;color:var(--ac);font-weight:700">(Filtrado)</span>' : '') + '</div>' +
           '</div>' +
           '<div style="display:flex;align-items:center;gap:6px">' +
-            '<span class="n" style="font-size:20px;font-weight:700">' + qtd + '</span> <span class="mut" style="font-size:13px">cab</span>' +
-            (pObj.id ? '<button type="button" class="sm sec btn-edit-pasto" data-id="' + esc(pObj.id) + '" title="Editar Nome do Pasto" style="padding:2px 7px;font-size:12px;min-height:28px;margin-left:4px">✏️</button>' : '') +
+            '<span class="n" style="font-size:20px;font-weight:700;color:var(--ac)">' + qtdFinal + '</span> <span class="mut" style="font-size:13px;font-weight:600">cab</span>' +
+            (pObj.id ? '<button type="button" class="sm sec btn-edit-pasto" data-id="' + esc(pObj.id) + '" title="Editar Pasto" style="padding:2px 7px;font-size:12px;min-height:28px;margin-left:4px">✏️</button>' : '') +
             (pObj.id ? '<button type="button" class="sm bad btn-del-pasto" data-id="' + esc(pObj.id) + '" title="Excluir Pasto" style="padding:2px 7px;font-size:12px;min-height:28px">🗑️</button>' : '') +
           '</div>' +
         '</div>' +
@@ -1970,6 +1983,7 @@ function abrirCadPasto(){
   $("titBoxCadPasto").textContent = "🌿 Cadastrar Novo Pasto / Piquete";
   $("pasto_edit_id").value = "";
   $("pasto_nome").value = "";
+  if ($("pasto_qtd")) $("pasto_qtd").value = "";
   setTimeout(function(){ $("pasto_nome").focus(); }, 100);
   box.scrollIntoView({ behavior: "smooth", block: "center" });
 }
@@ -1984,10 +1998,14 @@ function fecharCadPasto(){
 function salvarPasto(){
   var nome = $("pasto_nome").value.trim();
   if (!nome) {
-    alert("❌ Por favor, digite o nome do pasto ou piquete.\nEx.: Pasto 1, Pasto da Represa, Piquete 2");
+    alert("❌ Por favor, digite o nome do pasto ou piquete.\nEx.: Pasto 1, Pasto da Represa, Retiro");
     $("pasto_nome").focus();
     return;
   }
+
+  var qtdStr = $("pasto_qtd") ? $("pasto_qtd").value.trim() : "";
+  var qtdNum = qtdStr ? parseInt(qtdStr, 10) : 0;
+  if (isNaN(qtdNum) || qtdNum < 0) qtdNum = 0;
 
   var editId = $("pasto_edit_id").value;
 
@@ -2006,6 +2024,7 @@ function salvarPasto(){
     if (p) {
       var nomeAntigo = p.nome;
       p.nome = nome;
+      p.quantidade = qtdNum;
 
       // Se renomeou o pasto, atualiza os animais pertencentes
       if (nomeAntigo !== nome) {
@@ -2024,7 +2043,8 @@ function salvarPasto(){
     var novo = {
       id: "pasto_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
       user_id: (authUser && authUser.id) ? authUser.id : null,
-      nome: nome
+      nome: nome,
+      quantidade: qtdNum
     };
     pastosList.push(novo);
   }
@@ -2032,7 +2052,7 @@ function salvarPasto(){
   savePastos();
   fecharCadPasto();
   renderReb();
-  alert("✅ Pasto \"" + nome + "\" salvo com sucesso!");
+  alert("✅ Pasto \"" + nome + "\" salvo com sucesso! (" + qtdNum + " cabeças)");
 }
 
 function editarPasto(id){
@@ -2041,9 +2061,10 @@ function editarPasto(id){
 
   var box = $("boxCadPasto");
   box.hidden = false;
-  $("titBoxCadPasto").textContent = "✏️ Editar Nome do Pasto";
+  $("titBoxCadPasto").textContent = "✏️ Editar Pasto: " + p.nome;
   $("pasto_edit_id").value = p.id;
   $("pasto_nome").value = p.nome || "";
+  if ($("pasto_qtd")) $("pasto_qtd").value = (p.quantidade != null ? p.quantidade : "");
   setTimeout(function(){ $("pasto_nome").focus(); }, 100);
   box.scrollIntoView({ behavior: "smooth", block: "center" });
 }
@@ -2058,7 +2079,7 @@ function excluirPasto(id){
 
   var aviso = "Tem certeza que deseja excluir o pasto \"" + p.nome + "\"?";
   if (animaisNoPasto.length > 0) {
-    aviso = "⚠️ ATENÇÃO: Existem " + animaisNoPasto.length + " animal(is) ativos cadastrados no pasto \"" + p.nome + "\".\n\nAo excluir este pasto, esses animais passarão a constar como 'Sem pasto'.\n\nDeseja realmente excluir?";
+    aviso = "⚠️ ATENÇÃO: Existem " + animaisNoPasto.length + " animal(is) cadastrados no pasto \"" + p.nome + "\".\n\nAo excluir este pasto, esses animais passarão a constar como 'Sem pasto'.\n\nDeseja realmente excluir?";
   }
 
   if (!confirm(aviso)) return;
@@ -2173,21 +2194,28 @@ if ($("btnSalvarPasto")) $("btnSalvarPasto").onclick = salvarPasto;
 // Botão de cadastro rápido de pasto na tela de animal (+ Pasto)
 if ($("btnCadPastoRapido")) {
   $("btnCadPastoRapido").onclick = function(){
-    var nome = prompt("🌿 Cadastrar Novo Pasto\n\nInforme o nome do pasto ou piquete:\n(Ex.: Pasto da Represa, Piquete 1, Confinamento, Retiro)");
+    var nome = prompt("🌿 Cadastrar Novo Pasto\n\n1. Informe o nome do pasto ou piquete:\n(Ex.: Pasto 1, Pasto da Represa, Retiro)");
     if (!nome || !nome.trim()) return;
     nome = nome.trim();
-    var existe = pastosList.some(function(p){ return p.nome.toLowerCase() === nome.toLowerCase(); });
+    var qtdPrompt = prompt("2. Quantidade de cabeças neste pasto:\n(Ex.: 30)", "0");
+    var qtdNum = qtdPrompt ? parseInt(qtdPrompt, 10) : 0;
+    if (isNaN(qtdNum) || qtdNum < 0) qtdNum = 0;
+
+    var existe = pastosList.filter(function(p){ return p.nome.toLowerCase() === nome.toLowerCase(); })[0];
     if (!existe) {
       pastosList.push({
         id: "pasto_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
         user_id: (authUser && authUser.id) ? authUser.id : null,
-        nome: nome
+        nome: nome,
+        quantidade: qtdNum
       });
-      savePastos();
+    } else {
+      existe.quantidade = qtdNum;
     }
+    savePastos();
     atualizarSelectsPasto();
     if ($("f_lote")) $("f_lote").value = nome;
-    alert("✅ Pasto \"" + nome + "\" criado e selecionado para este animal!");
+    alert("✅ Pasto \"" + nome + "\" criado com " + qtdNum + " cabeças e selecionado!");
   };
 }
 
