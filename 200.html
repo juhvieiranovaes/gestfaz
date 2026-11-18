@@ -475,25 +475,52 @@ pre{white-space:pre-wrap;background:var(--card);border:1px solid var(--bd);borde
   <div id="pastos"></div>
 
   <!-- CAIXA DE MOVER PASTO EM MASSA -->
-  <div id="boxMoverPasto" class="card highlight" hidden style="margin:12px 0;background:var(--ac-light);border:2px solid var(--ac)">
+  <div id="boxMoverPasto" class="card highlight" hidden style="margin:12px 0;background:var(--card);border:2px solid var(--ac)">
     <div class="row">
-      <b style="font-size:16px;color:var(--ac)">🔄 Transferência de Pasto em Massa</b>
+      <b style="font-size:16px;color:var(--ac)">🔄 Transferência de Pasto / Piquete</b>
       <button id="btnFecharMoverPasto" class="sm bad" type="button" style="min-height:30px;padding:2px 8px">✕ Fechar</button>
     </div>
-    <div class="mut" style="margin:6px 0 10px">Mova todos os animais de um pasto para outro de uma só vez:</div>
+    <div class="mut" style="margin:4px 0 12px">Mova o gado de um pasto para outro escolhendo a quantidade ou todo o lote:</div>
+    
     <div class="two">
       <div>
-        <label style="margin-top:0">Pasto de Origem (Sair de):</label>
-        <select id="moverOrigem"></select>
+        <label style="margin-top:0">Pasto de Origem (Sair de) *</label>
+        <select id="moverOrigem">
+          <option value="">Selecione o pasto de origem...</option>
+        </select>
       </div>
       <div>
-        <label style="margin-top:0">Pasto de Destino (Ir para):</label>
-        <select id="moverDestino"><option value="">Selecione o pasto de destino...</option></select>
+        <label style="margin-top:0">Pasto de Destino (Ir para) *</label>
+        <select id="moverDestino">
+          <option value="">Selecione o pasto de destino...</option>
+        </select>
       </div>
     </div>
-    <div id="moverInfo" class="mut" style="margin:10px 0;font-weight:600"></div>
-    <div class="bar" style="margin-top:6px">
-      <button id="btnConfirmarMoverPasto" class="pri" type="button">✅ Confirmar Transferência</button>
+
+    <!-- ESCOLHA DA QUANTIDADE -->
+    <div style="margin-top:12px;background:var(--ac-light);padding:12px;border-radius:10px;border:1px solid var(--ac)">
+      <label style="margin-top:0;font-weight:700;color:var(--tx)">Quantidade a Mover:</label>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600">
+          <input type="radio" name="mover_modo" id="mover_modo_tudo" value="tudo" checked style="width:auto;min-height:auto;margin:0">
+          <span id="txtMoverTudo">Mover todas as cabeças do pasto</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600">
+          <input type="radio" name="mover_modo" id="mover_modo_qtd" value="parcial" style="width:auto;min-height:auto;margin:0">
+          <span>Mover apenas uma quantidade específica</span>
+        </label>
+      </div>
+
+      <div id="boxMoverQtdInput" hidden style="margin-top:10px">
+        <label style="margin-top:0;font-size:13px">Quantas cabeças deseja transferir?</label>
+        <input id="moverQtdNum" type="number" inputmode="numeric" placeholder="Ex.: 10" style="max-width:200px">
+      </div>
+    </div>
+
+    <div id="moverInfo" class="mut" style="margin:12px 0 6px;font-weight:600;font-size:14px"></div>
+
+    <div class="bar" style="margin-top:10px">
+      <button id="btnConfirmarMoverPasto" class="pri" type="button" style="width:100%">✅ Confirmar Transferência de Pasto</button>
     </div>
   </div>
 
@@ -1908,17 +1935,8 @@ function renderReb(){
     }).join("");
   }
 
-  // Atualiza opções do seletor de origem de pasto no Mover
-  var selOrigem = $("moverOrigem");
-  if (selOrigem) {
-    var valAnteriorOrig = selOrigem.value;
-    var pastosComGado = Object.keys(lt).sort(function(a,b){ return a.localeCompare(b, "pt", {numeric:true}); });
-    selOrigem.innerHTML = pastosComGado.map(function(l){
-      var nm = /^d+$/.test(l) ? "Pasto " + l : l;
-      return '<option value="'+esc(l)+'"' + (l === valAnteriorOrig ? ' selected' : '') + '>' + esc(nm) + ' (' + lt[l] + ' animais)</option>';
-    }).join("") || '<option value="">Nenhum pasto com animais</option>';
-    atualizarMoverInfo();
-  }
+  atualizarSelectsPasto();
+  atualizarMoverInfo();
 
   atualizarSelectsPasto();
 
@@ -2160,13 +2178,32 @@ function atualizarSelectsPasto(){
     }
   }
 
-  // 2. Select moverDestino
+  // 2. Select moverOrigem (AGORA MOSTRA TODOS OS PASTOS REGISTRADOS!)
+  var selOrigem = $("moverOrigem");
+  if (selOrigem) {
+    var valOrigemAtual = selOrigem.value;
+    var optsOrigem = '<option value="">Selecione o pasto de origem...</option>';
+    nomes.forEach(function(n){
+      var qtd = getQtdTotalPasto(n);
+      optsOrigem += '<option value="' + esc(n) + '"' + (n === valOrigemAtual ? ' selected' : '') + '>' + esc(n) + ' (' + qtd + ' cab)</option>';
+    });
+    // Se tiver animais marcados como "Sem pasto"
+    var qtdSemPasto = animais.filter(function(a){ return a.status === "ativo" && (!a.lote || a.lote.trim() === ""); }).length;
+    if (qtdSemPasto > 0) {
+      optsOrigem += '<option value="Sem pasto"' + ("Sem pasto" === valOrigemAtual ? ' selected' : '') + '>⚠️ Sem pasto definido (' + qtdSemPasto + ' cab)</option>';
+    }
+    selOrigem.innerHTML = optsOrigem;
+    if (valOrigemAtual) selOrigem.value = valOrigemAtual;
+  }
+
+  // 3. Select moverDestino
   var selDest = $("moverDestino");
   if (selDest) {
     var valDest = selDest.value;
     var optsDest = '<option value="">Selecione o pasto de destino...</option>';
     nomes.forEach(function(n){
-      optsDest += '<option value="' + esc(n) + '"' + (n === valDest ? ' selected' : '') + '>' + esc(n) + '</option>';
+      var qtd = getQtdTotalPasto(n);
+      optsDest += '<option value="' + esc(n) + '"' + (n === valDest ? ' selected' : '') + '>' + esc(n) + ' (' + qtd + ' cab)</option>';
     });
     optsDest += '<option value="__novo__">🌿 + Cadastrar Novo Pasto de Destino...</option>';
     selDest.innerHTML = optsDest;
@@ -2176,19 +2213,60 @@ function atualizarSelectsPasto(){
   }
 }
 
-// ==================== MOVER PASTO EM MASSA ====================
-function atualizarMoverInfo(){
-  var orig = $("moverOrigem").value;
-  if (!orig) {
-    $("moverInfo").textContent = "Nenhum pasto de origem selecionado.";
-    return;
-  }
-  var at = animais.filter(function(a){ return a.status === "ativo" && (a.lote || "Sem pasto") === orig; });
-  var nm = /^\d+$/.test(orig) ? "Pasto " + orig : orig;
-  $("moverInfo").innerHTML = '📍 <b>' + at.length + ' animais ativos</b> serão transferidos do <u>' + esc(nm) + '</u> para o novo destino.';
+// ==================== MOVER PASTO EM MASSA & PARCIAL ====================
+function getQtdTotalPasto(nomePasto){
+  if (!nomePasto) return 0;
+  var pObj = pastosList.filter(function(p){ return p.nome.trim() === nomePasto.trim(); })[0];
+  var qtdIndiv = animais.filter(function(a){ return a.status === "ativo" && (a.lote || "Sem pasto") === nomePasto; }).length;
+  var qtdPasto = (pObj && pObj.quantidade != null && pObj.quantidade !== "") ? parseInt(pObj.quantidade, 10) : 0;
+  return Math.max(qtdIndiv, qtdPasto);
 }
 
-$("moverOrigem").onchange = atualizarMoverInfo;
+function atualizarMoverInfo(){
+  var orig = $("moverOrigem") ? $("moverOrigem").value : "";
+  var dest = $("moverDestino") ? $("moverDestino").value : "";
+  var modoQtd = $("mover_modo_qtd") && $("mover_modo_qtd").checked;
+
+  if ($("boxMoverQtdInput")) {
+    $("boxMoverQtdInput").hidden = !modoQtd;
+  }
+
+  if (!orig) {
+    if ($("txtMoverTudo")) $("txtMoverTudo").textContent = "Mover todas as cabeças do pasto";
+    $("moverInfo").textContent = "Selecione o pasto de origem para ver a quantidade disponível.";
+    return;
+  }
+
+  var totalDisp = getQtdTotalPasto(orig);
+  var nmOrig = /^d+$/.test(orig) ? "Pasto " + orig : orig;
+  var nmDest = dest ? (/^d+$/.test(dest) ? "Pasto " + dest : dest) : "o destino";
+
+  if ($("txtMoverTudo")) {
+    $("txtMoverTudo").textContent = "Mover todas as " + totalDisp + " cabeças do " + nmOrig;
+  }
+
+  if (modoQtd) {
+    var qtdInput = $("moverQtdNum") ? parseInt($("moverQtdNum").value, 10) : 0;
+    if (isNaN(qtdInput) || qtdInput <= 0) {
+      $("moverInfo").innerHTML = '📍 <b>' + totalDisp + ' cabeças disponíveis</b> no <u>' + esc(nmOrig) + '</u>. Digite a quantidade a transferir.';
+    } else if (qtdInput > totalDisp) {
+      $("moverInfo").innerHTML = '<span style="color:#c62828">⚠️ Quantidade informada (' + qtdInput + ') é maior do que o total disponível (' + totalDisp + ' cab).</span>';
+    } else {
+      var restante = totalDisp - qtdInput;
+      $("moverInfo").innerHTML = '📍 Serão transferidas <b>' + qtdInput + ' cabeças</b> para ' + esc(nmDest) + '. Restarão <b>' + restante + ' cabeças</b> no ' + esc(nmOrig) + '.';
+    }
+  } else {
+    $("moverInfo").innerHTML = '📍 <b>Todas as ' + totalDisp + ' cabeças</b> serão transferidas do <u>' + esc(nmOrig) + '</u> para ' + esc(nmDest) + '.';
+  }
+}
+
+if ($("moverOrigem")) $("moverOrigem").onchange = atualizarMoverInfo;
+if ($("mover_modo_tudo")) $("mover_modo_tudo").onchange = atualizarMoverInfo;
+if ($("mover_modo_qtd")) $("mover_modo_qtd").onchange = function(){
+  atualizarMoverInfo();
+  if ($("moverQtdNum")) $("moverQtdNum").focus();
+};
+if ($("moverQtdNum")) $("moverQtdNum").oninput = atualizarMoverInfo;
 
 if ($("moverDestino")) {
   $("moverDestino").onchange = function(){
@@ -2201,7 +2279,8 @@ if ($("moverDestino")) {
           pastosList.push({
             id: "pasto_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
             user_id: (authUser && authUser.id) ? authUser.id : null,
-            nome: nome
+            nome: nome,
+            quantidade: 0
           });
           savePastos();
         }
@@ -2211,6 +2290,7 @@ if ($("moverDestino")) {
         $("moverDestino").value = "";
       }
     }
+    atualizarMoverInfo();
   };
 }
 
@@ -2250,11 +2330,15 @@ if ($("btnCadPastoRapido")) {
 
 $("btnAbrirMoverPasto").onclick = function(){
   $("boxMoverPasto").hidden = false;
-  if (pastoSel) {
+  atualizarSelectsPasto();
+  if (pastoSel && $("moverOrigem")) {
     $("moverOrigem").value = pastoSel;
   }
+  if ($("mover_modo_tudo")) $("mover_modo_tudo").checked = true;
+  if ($("moverQtdNum")) $("moverQtdNum").value = "";
   atualizarMoverInfo();
-  $("moverDestino").focus();
+  if ($("moverDestino")) $("moverDestino").focus();
+  $("boxMoverPasto").scrollIntoView({ behavior: "smooth", block: "center" });
 };
 
 $("btnFecharMoverPasto").onclick = function(){
@@ -2266,44 +2350,93 @@ $("btnConfirmarMoverPasto").onclick = function(){
   var dest = $("moverDestino").value.trim();
 
   if (!orig) {
-    alert("Selecione o pasto de origem.");
+    alert("❌ Por favor, selecione o pasto de origem.");
+    $("moverOrigem").focus();
     return;
   }
   if (!dest) {
-    alert("Informe o nome ou número do pasto de destino.");
+    alert("❌ Por favor, selecione o pasto de destino.");
     $("moverDestino").focus();
     return;
   }
   if (orig === dest) {
-    alert("O pasto de destino não pode ser igual ao pasto de origem.");
+    alert("❌ O pasto de destino não pode ser igual ao pasto de origem.");
     return;
   }
 
-  var animaisParaMover = animais.filter(function(a){
+  var totalDisp = getQtdTotalPasto(orig);
+  if (totalDisp <= 0) {
+    alert("❌ O pasto de origem \"" + orig + "\" não possui animais para transferir.");
+    return;
+  }
+
+  var modoParcial = $("mover_modo_qtd") && $("mover_modo_qtd").checked;
+  var qtdMover = totalDisp;
+
+  if (modoParcial) {
+    var qVal = $("moverQtdNum") ? parseInt($("moverQtdNum").value, 10) : 0;
+    if (isNaN(qVal) || qVal <= 0) {
+      alert("❌ Por favor, informe a quantidade de cabeças que deseja transferir.");
+      if ($("moverQtdNum")) $("moverQtdNum").focus();
+      return;
+    }
+    if (qVal > totalDisp) {
+      alert("❌ A quantidade informada (" + qVal + ") é maior do que a quantidade disponível no pasto (" + totalDisp + " cab).");
+      if ($("moverQtdNum")) $("moverQtdNum").focus();
+      return;
+    }
+    qtdMover = qVal;
+  }
+
+  var nmOrig = /^d+$/.test(orig) ? "Pasto " + orig : orig;
+  var nmDest = /^d+$/.test(dest) ? "Pasto " + dest : dest;
+
+  var msgConfirma = "Confirma a transferência de " + qtdMover + " cabeça(s) do \"" + nmOrig + "\" para o \"" + nmDest + "\"?";
+  if (!confirm(msgConfirma)) return;
+
+  // 1. Atualiza quantidade nos objetos de pastosList
+  var pOrig = pastosList.filter(function(p){ return p.nome.trim() === orig.trim(); })[0];
+  var pDest = pastosList.filter(function(p){ return p.nome.trim() === dest.trim(); })[0];
+
+  if (pOrig) {
+    var curOrigQtd = (pOrig.quantidade != null && pOrig.quantidade !== "") ? parseInt(pOrig.quantidade, 10) : totalDisp;
+    pOrig.quantidade = Math.max(0, curOrigQtd - qtdMover);
+  }
+
+  if (pDest) {
+    var curDestQtd = (pDest.quantidade != null && pDest.quantidade !== "") ? parseInt(pDest.quantidade, 10) : 0;
+    pDest.quantidade = curDestQtd + qtdMover;
+  } else {
+    // Se o destino não estava em pastosList, cria
+    pastosList.push({
+      id: "pasto_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+      user_id: (authUser && authUser.id) ? authUser.id : null,
+      nome: dest,
+      quantidade: qtdMover
+    });
+  }
+
+  // 2. Atualiza animais individuais com brinco caso existam
+  var animaisOrig = animais.filter(function(a){
     return a.status === "ativo" && (a.lote || "Sem pasto") === orig;
   });
 
-  if (animaisParaMover.length === 0) {
-    alert("Não há animais ativos no pasto selecionado.");
-    return;
+  if (animaisOrig.length > 0) {
+    var numAnimaisMover = Math.min(qtdMover, animaisOrig.length);
+    for (var i = 0; i < numAnimaisMover; i++) {
+      animaisOrig[i].lote = dest;
+    }
+    save();
   }
 
-  var nmOrig = /^\d+$/.test(orig) ? "Pasto " + orig : orig;
-  var nmDest = /^\d+$/.test(dest) ? "Pasto " + dest : dest;
+  savePastos();
 
-  var msg = "Confirma transferir todos os " + animaisParaMover.length + " animais do " + nmOrig + " para o " + nmDest + "?";
-  if (!confirm(msg)) return;
-
-  animaisParaMover.forEach(function(a){
-    a.lote = dest;
-  });
-
-  save();
   $("boxMoverPasto").hidden = true;
   $("moverDestino").value = "";
+  if ($("moverQtdNum")) $("moverQtdNum").value = "";
   pastoSel = dest; // já filtra o novo pasto para conferência
   renderReb();
-  alert("✅ Sucesso! " + animaisParaMover.length + " animais foram transferidos para o " + nmDest + ".");
+    alert("✅ Sucesso!\n\n" + qtdMover + " cabeça(s) foram transferidas do " + nmOrig + " para o " + nmDest + ".");
 };
 
 // ==================== CADASTRO & EDIÇÃO ====================
