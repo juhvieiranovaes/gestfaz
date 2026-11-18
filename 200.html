@@ -364,6 +364,63 @@ pre{white-space:pre-wrap;background:var(--card);border:1px solid var(--bd);borde
   </div>
 </div>
 
+<!-- MODAL DE AJUDA & GUIA GESTFAZ -->
+<div id="ajudaModal" class="modal-backdrop noprint" hidden>
+  <div class="modal-card">
+    <div class="row" style="margin-bottom:12px">
+      <b style="font-size:18px;color:var(--ac)">🐂 GESTFAZ - Ajuda & Guia</b>
+      <button id="btnFecharAjuda" class="sm bad" type="button" style="min-height:30px;padding:2px 8px">✕ Fechar</button>
+    </div>
+    
+    <div style="font-size:14px;line-height:1.55">
+      <div class="card" style="background:var(--ac-light);border:1.5px solid var(--ac);padding:12px;margin:0 0 12px">
+        <b style="color:var(--ac);font-size:15px">🐂 Aplicativo GESTFAZ</b>
+        <div class="mut" style="font-size:13px;margin-top:2px">Controle Inteligente de Rebanho, Máquinas Agrícolas e Chuvas.</div>
+      </div>
+
+      <div style="font-weight:700;margin:10px 0 6px;color:var(--tx)">✨ Recursos & Manejo:</div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+        <div style="background:var(--card);border:1px solid var(--bd);padding:8px 10px;border-radius:10px">
+          <b>📶 100% Offline e Nuvem:</b> Registre animais no pasto mesmo sem internet. Quando tiver sinal, toque em <b>☁️</b> no topo para sincronizar com sua conta.
+        </div>
+        <div style="background:var(--card);border:1px solid var(--bd);padding:8px 10px;border-radius:10px">
+          <b>🐮 Nascimentos de Bezerros:</b> Não precisa de brinco agora. Cadastre apenas informando o <b>Brinco da Mãe</b> para gerar o código provisório (ex: <i>Bez-104</i>).
+        </div>
+        <div style="background:var(--card);border:1px solid var(--bd);padding:8px 10px;border-radius:10px">
+          <b>🚜 Máquinas e Veículos:</b> Controle horímetro, quilometragem, serviços realizados e operadores.
+        </div>
+        <div style="background:var(--card);border:1px solid var(--bd);padding:8px 10px;border-radius:10px">
+          <b>🌧️ Pluviômetro:</b> Lance chuvas por data e veja o acumulado de mm no mês e no ano.
+        </div>
+        <div style="background:var(--card);border:1px solid var(--bd);padding:8px 10px;border-radius:10px">
+          <b>📊 Relatórios & Excel:</b> Exporte planilhas completas (.CSV) ou gere PDFs para impressão.
+        </div>
+      </div>
+
+      <div class="card" style="padding:10px 12px;margin:10px 0;background:var(--card);border:1px solid var(--bd)">
+        <b style="color:var(--tx)">📱 Instalação no Celular:</b>
+        <div class="mut" style="font-size:13px;margin-top:3px">
+          Para abrir em tela cheia na fazenda como um app nativo, toque nos três pontinhos do navegador e selecione <b>"Instalar aplicativo"</b> ou <b>"Adicionar à tela inicial"</b>.
+        </div>
+      </div>
+    </div>
+
+    <div class="bar" style="margin-top:14px">
+      <button id="btnEntendiAjuda" class="pri" type="button">Entendi, Voltar ao App</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL GLOBAL DE ALERTA GESTFAZ (Substitui o alert nativo do navegador) -->
+<div id="globalAlertModal" class="modal-backdrop noprint" hidden>
+  <div class="modal-card" style="max-width:380px;text-align:center;padding:20px 16px">
+    <div style="font-size:32px;margin-bottom:6px" id="globalAlertIcon">🐂</div>
+    <div style="font-weight:800;font-size:18px;color:var(--ac);margin-bottom:8px" id="globalAlertTit">GESTFAZ</div>
+    <div style="font-size:14px;color:var(--tx);white-space:pre-wrap;line-height:1.5;margin-bottom:18px" id="globalAlertMsg"></div>
+    <button id="globalAlertBtnOk" class="pri" type="button" style="width:100%;min-height:44px;font-size:15px">OK</button>
+  </div>
+</div>
+
 <div class="tabs noprint">
   <button data-t="reb" class="on">Rebanho</button>
   <button data-t="cad">+ Animal</button>
@@ -1590,9 +1647,30 @@ document.querySelectorAll(".tabs button").forEach(function(b){
   };
 });
 
-$("btnSobre").onclick = function(){
-  alert("GESTFAZ - Controle de Rebanho & Fazenda\n\n• Funciona 100% offline no celular e computador.\n• Brinco, Nº de Controle, Peso, Lote, Vacinação e IATF.\n• Pluviômetro integrado (chuvas por mês e distribuição anual).\n• Exportação para Excel e PDF editável.\n\nDica: No celular, toque em 'Adicionar à tela de início' para instalar como aplicativo!");
+// Substituição profissional de alert() para eliminar "juhvieiranovaes.github.io diz"
+window.alert = function(msg, titulo){
+  var modal = $("globalAlertModal");
+  if (!modal) return;
+  $("globalAlertTit").textContent = titulo || "GESTFAZ";
+  $("globalAlertMsg").textContent = String(msg == null ? "" : msg);
+  modal.hidden = false;
 };
+if ($("globalAlertBtnOk")) {
+  $("globalAlertBtnOk").onclick = function(){
+    $("globalAlertModal").hidden = true;
+  };
+}
+
+// Modal de Ajuda & Guia GESTFAZ
+function abrirModalAjuda(){
+  $("ajudaModal").hidden = false;
+}
+function fecharModalAjuda(){
+  $("ajudaModal").hidden = true;
+}
+$("btnSobre").onclick = abrirModalAjuda;
+if ($("btnFecharAjuda")) $("btnFecharAjuda").onclick = fecharModalAjuda;
+if ($("btnEntendiAjuda")) $("btnEntendiAjuda").onclick = fecharModalAjuda;
 
 // ==================== REBANHO & DASHBOARD ====================
 function renderReb(){
