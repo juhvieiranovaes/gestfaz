@@ -467,6 +467,11 @@ pre{white-space:pre-wrap;background:var(--card);border:1px solid var(--bd);borde
       </div>
     </div>
 
+    <div style="margin-top:8px">
+      <label style="margin-top:0">Observações do Vaqueiro / Pasto (opcional)</label>
+      <input id="pasto_obs" placeholder="Ex.: Cerca reformada, bebedouro limpo, capim alto, cocho abastecido">
+    </div>
+
     <div class="bar" style="margin-top:12px;display:flex;gap:8px">
       <button id="btnSalvarPasto" class="pri" type="button" style="background:#2e7d32">💾 Salvar Pasto</button>
       <button id="btnCancelarPasto" class="sec" type="button">Cancelar</button>
@@ -515,6 +520,11 @@ pre{white-space:pre-wrap;background:var(--card);border:1px solid var(--bd);borde
         <label style="margin-top:0;font-size:13px">Quantas cabeças deseja transferir?</label>
         <input id="moverQtdNum" type="number" inputmode="numeric" placeholder="Ex.: 10" style="max-width:200px">
       </div>
+    </div>
+
+    <div style="margin-top:10px">
+      <label style="margin-top:0;font-size:13px">Observação da Mudança (opcional para o vaqueiro anotar):</label>
+      <input id="mover_obs" placeholder="Ex.: Mudança para descanso do pasto, bezerros apartados, etc.">
     </div>
 
     <div id="moverInfo" class="mut" style="margin:12px 0 6px;font-weight:600;font-size:14px"></div>
@@ -1659,7 +1669,8 @@ async function sincronizarNuvem(silencioso){
           id: String(p.id),
           user_id: uid,
           nome: String(p.nome),
-          quantidade: p.quantidade ? parseInt(p.quantidade, 10) : 0
+          quantidade: p.quantidade ? parseInt(p.quantidade, 10) : 0,
+          obs: p.obs || null
         };
       });
       await fetch(SUPABASE_URL + "/rest/v1/pastos", {
@@ -1871,6 +1882,7 @@ function renderReb(){
         '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">' +
           '<div style="flex:1">' +
             '<div style="font-weight:800;font-size:15px;color:var(--tx)">🌿 ' + esc(nomeP) + (isSel ? ' <span style="font-size:11px;color:var(--ac);font-weight:700">(Filtrado)</span>' : '') + '</div>' +
+            (pObj.obs ? '<div class="mut" style="font-size:12px;margin-top:3px;color:var(--tx)">💬 <i>' + esc(pObj.obs) + '</i></div>' : '') +
           '</div>' +
           '<div style="display:flex;align-items:center;gap:6px">' +
             '<span class="n" style="font-size:20px;font-weight:700;color:var(--ac)">' + qtdFinal + '</span> <span class="mut" style="font-size:13px;font-weight:600">cab</span>' +
@@ -2031,6 +2043,7 @@ function abrirCadPasto(){
   $("pasto_edit_id").value = "";
   $("pasto_nome").value = "";
   if ($("pasto_qtd")) $("pasto_qtd").value = "";
+  if ($("pasto_obs")) $("pasto_obs").value = "";
   setTimeout(function(){ $("pasto_nome").focus(); }, 100);
   box.scrollIntoView({ behavior: "smooth", block: "center" });
 }
@@ -2053,6 +2066,7 @@ function salvarPasto(){
   var qtdStr = $("pasto_qtd") ? $("pasto_qtd").value.trim() : "";
   var qtdNum = qtdStr ? parseInt(qtdStr, 10) : 0;
   if (isNaN(qtdNum) || qtdNum < 0) qtdNum = 0;
+  var obsPasto = $("pasto_obs") ? $("pasto_obs").value.trim() : "";
 
   var editId = $("pasto_edit_id").value;
 
@@ -2072,6 +2086,7 @@ function salvarPasto(){
       var nomeAntigo = p.nome;
       p.nome = nome;
       p.quantidade = qtdNum;
+      p.obs = obsPasto || null;
 
       // Se renomeou o pasto, atualiza os animais pertencentes
       if (nomeAntigo !== nome) {
@@ -2091,7 +2106,8 @@ function salvarPasto(){
       id: "pasto_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
       user_id: (authUser && authUser.id) ? authUser.id : null,
       nome: nome,
-      quantidade: qtdNum
+      quantidade: qtdNum,
+      obs: obsPasto || null
     };
     pastosList.push(novo);
   }
@@ -2112,6 +2128,7 @@ function editarPasto(id){
   $("pasto_edit_id").value = p.id;
   $("pasto_nome").value = p.nome || "";
   if ($("pasto_qtd")) $("pasto_qtd").value = (p.quantidade != null ? p.quantidade : "");
+  if ($("pasto_obs")) $("pasto_obs").value = p.obs || "";
   setTimeout(function(){ $("pasto_nome").focus(); }, 100);
   box.scrollIntoView({ behavior: "smooth", block: "center" });
 }
@@ -2336,6 +2353,7 @@ $("btnAbrirMoverPasto").onclick = function(){
   }
   if ($("mover_modo_tudo")) $("mover_modo_tudo").checked = true;
   if ($("moverQtdNum")) $("moverQtdNum").value = "";
+  if ($("mover_obs")) $("mover_obs").value = "";
   atualizarMoverInfo();
   if ($("moverDestino")) $("moverDestino").focus();
   $("boxMoverPasto").scrollIntoView({ behavior: "smooth", block: "center" });
@@ -2394,9 +2412,15 @@ $("btnConfirmarMoverPasto").onclick = function(){
   var msgConfirma = "Confirma a transferência de " + qtdMover + " cabeça(s) do \"" + nmOrig + "\" para o \"" + nmDest + "\"?";
   if (!confirm(msgConfirma)) return;
 
+  var moverObsTexto = $("mover_obs") ? $("mover_obs").value.trim() : "";
+
   // 1. Atualiza quantidade nos objetos de pastosList
   var pOrig = pastosList.filter(function(p){ return p.nome.trim() === orig.trim(); })[0];
   var pDest = pastosList.filter(function(p){ return p.nome.trim() === dest.trim(); })[0];
+
+  if (pDest && moverObsTexto) {
+    pDest.obs = moverObsTexto;
+  }
 
   if (pOrig) {
     var curOrigQtd = (pOrig.quantidade != null && pOrig.quantidade !== "") ? parseInt(pOrig.quantidade, 10) : totalDisp;
