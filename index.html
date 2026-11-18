@@ -412,12 +412,39 @@ pre{white-space:pre-wrap;background:var(--card);border:1px solid var(--bd);borde
 </div>
 
 <!-- MODAL GLOBAL DE ALERTA GESTFAZ (Substitui o alert nativo do navegador) -->
-<div id="globalAlertModal" class="modal-backdrop noprint" hidden>
+<div id="globalAlertModal" class="modal-backdrop noprint" hidden style="z-index:9999">
   <div class="modal-card" style="max-width:380px;text-align:center;padding:20px 16px">
     <div style="font-size:32px;margin-bottom:6px" id="globalAlertIcon">🐂</div>
     <div style="font-weight:800;font-size:18px;color:var(--ac);margin-bottom:8px" id="globalAlertTit">GESTFAZ</div>
     <div style="font-size:14px;color:var(--tx);white-space:pre-wrap;line-height:1.5;margin-bottom:18px" id="globalAlertMsg"></div>
     <button id="globalAlertBtnOk" class="pri" type="button" style="width:100%;min-height:44px;font-size:15px">OK</button>
+  </div>
+</div>
+
+<!-- MODAL GLOBAL DE CONFIRMAÇÃO (Elimina confirm() com URL do navegador) -->
+<div id="globalConfirmModal" class="modal-backdrop noprint" hidden style="z-index:9999">
+  <div class="modal-card" style="max-width:380px;text-align:center;padding:22px 18px">
+    <div style="font-size:32px;margin-bottom:6px" id="globalConfirmIcon">🐂</div>
+    <div style="font-weight:800;font-size:18px;color:var(--ac);margin-bottom:8px" id="globalConfirmTit">GESTFAZ</div>
+    <div style="font-size:14px;color:var(--tx);white-space:pre-wrap;line-height:1.5;margin-bottom:20px" id="globalConfirmMsg"></div>
+    <div style="display:flex;gap:10px">
+      <button id="globalConfirmBtnCancel" class="sec" type="button" style="flex:1;min-height:44px;font-size:14px;font-weight:600">Cancelar</button>
+      <button id="globalConfirmBtnOk" class="pri" type="button" style="flex:1;min-height:44px;font-size:14px;font-weight:700">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL GLOBAL DE ENTRADA (Elimina prompt() com URL do navegador) -->
+<div id="globalPromptModal" class="modal-backdrop noprint" hidden style="z-index:9999">
+  <div class="modal-card" style="max-width:380px;text-align:center;padding:22px 18px">
+    <div style="font-size:32px;margin-bottom:6px" id="globalPromptIcon">🐂</div>
+    <div style="font-weight:800;font-size:18px;color:var(--ac);margin-bottom:8px" id="globalPromptTit">GESTFAZ</div>
+    <div style="font-size:14px;color:var(--tx);white-space:pre-wrap;line-height:1.5;margin-bottom:14px;text-align:left" id="globalPromptMsg"></div>
+    <input id="globalPromptInput" type="text" style="width:100%;margin-bottom:18px;font-size:15px;padding:10px 12px;border:1.5px solid var(--bd);border-radius:10px">
+    <div style="display:flex;gap:10px">
+      <button id="globalPromptBtnCancel" class="sec" type="button" style="flex:1;min-height:44px;font-size:14px;font-weight:600">Cancelar</button>
+      <button id="globalPromptBtnOk" class="pri" type="button" style="flex:1;min-height:44px;font-size:14px;font-weight:700">OK</button>
+    </div>
   </div>
 </div>
 
@@ -1441,8 +1468,8 @@ $("btnAuthSyncNow").onclick = function(){
   sincronizarNuvem(false);
 };
 
-$("btnAuthLogout").onclick = function(){
-  if (confirm("Deseja realmente sair da sua conta neste aparelho?")) {
+$("btnAuthLogout").onclick = async function(){
+  if (await appConfirm("Deseja realmente sair da sua conta neste aparelho?")) {
     authUser = null;
     localStorage.removeItem(KEY_AUTH_USER);
     animais = [];
@@ -1467,10 +1494,10 @@ $("btnAuthLogout").onclick = function(){
 };
 
 $("btnAuthDeleteAccount").onclick = async function(){
-  if (!confirm("⚠️ ATENÇÃO: Tem certeza que deseja EXCLUIR PERMANENTEMENTE sua conta?\n\nEsta ação apagará sua conta de e-mail e os registros vinculados a ela na nuvem Supabase.")) {
+  if (!await appConfirm("⚠️ ATENÇÃO: Tem certeza que deseja EXCLUIR PERMANENTEMENTE sua conta?\n\nEsta ação apagará sua conta de e-mail e os registros vinculados a ela na nuvem Supabase.")) {
     return;
   }
-  var confirmacao = prompt("Para confirmar a exclusão definitiva, digite EXCLUIR em letras maiúsculas:");
+  var confirmacao = await appPrompt("Para confirmar a exclusão definitiva, digite EXCLUIR em letras maiúsculas:");
   if (confirmacao !== "EXCLUIR") {
     alert("Operação cancelada. Sua conta não foi excluída.");
     return;
@@ -1784,7 +1811,7 @@ document.querySelectorAll(".tabs button").forEach(function(b){
   };
 });
 
-// Substituição profissional de alert() para eliminar "juhvieiranovaes.github.io diz"
+// Substituição profissional de alert(), confirm() e prompt() para eliminar títulos com URL do navegador
 window.alert = function(msg, titulo){
   var modal = $("globalAlertModal");
   if (!modal) return;
@@ -1795,6 +1822,77 @@ window.alert = function(msg, titulo){
 if ($("globalAlertBtnOk")) {
   $("globalAlertBtnOk").onclick = function(){
     $("globalAlertModal").hidden = true;
+  };
+}
+
+var confirmResolver = null;
+function appConfirm(msg, titulo){
+  return new Promise(function(resolve){
+    confirmResolver = resolve;
+    var modal = $("globalConfirmModal");
+    if (!modal) {
+      resolve(true);
+      return;
+    }
+    $("globalConfirmTit").textContent = titulo || "GESTFAZ";
+    $("globalConfirmMsg").textContent = String(msg == null ? "" : msg);
+    modal.hidden = false;
+  });
+}
+window.confirm = appConfirm;
+
+if ($("globalConfirmBtnOk")) {
+  $("globalConfirmBtnOk").onclick = function(){
+    $("globalConfirmModal").hidden = true;
+    if (confirmResolver) { confirmResolver(true); confirmResolver = null; }
+  };
+}
+if ($("globalConfirmBtnCancel")) {
+  $("globalConfirmBtnCancel").onclick = function(){
+    $("globalConfirmModal").hidden = true;
+    if (confirmResolver) { confirmResolver(false); confirmResolver = null; }
+  };
+}
+
+var promptResolver = null;
+function appPrompt(msg, valorPadrao, titulo){
+  return new Promise(function(resolve){
+    promptResolver = resolve;
+    var modal = $("globalPromptModal");
+    if (!modal) {
+      resolve(null);
+      return;
+    }
+    $("globalPromptTit").textContent = titulo || "GESTFAZ";
+    $("globalPromptMsg").textContent = String(msg == null ? "" : msg);
+    var inp = $("globalPromptInput");
+    inp.value = valorPadrao != null ? String(valorPadrao) : "";
+    modal.hidden = false;
+    setTimeout(function(){ inp.focus(); inp.select(); }, 100);
+  });
+}
+window.prompt = appPrompt;
+
+if ($("globalPromptBtnOk")) {
+  $("globalPromptBtnOk").onclick = function(){
+    $("globalPromptModal").hidden = true;
+    var val = $("globalPromptInput").value;
+    if (promptResolver) { promptResolver(val); promptResolver = null; }
+  };
+}
+if ($("globalPromptBtnCancel")) {
+  $("globalPromptBtnCancel").onclick = function(){
+    $("globalPromptModal").hidden = true;
+    if (promptResolver) { promptResolver(null); promptResolver = null; }
+  };
+}
+if ($("globalPromptInput")) {
+  $("globalPromptInput").onkeydown = function(e){
+    if (e.key === "Enter") {
+      $("globalPromptBtnOk").click();
+    } else if (e.key === "Escape") {
+      $("globalPromptBtnCancel").click();
+    }
   };
 }
 
@@ -2133,7 +2231,7 @@ function editarPasto(id){
   box.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
-function excluirPasto(id){
+async function excluirPasto(id){
   var p = pastosList.filter(function(x){ return x.id === id; })[0];
   if (!p) return;
 
@@ -2146,7 +2244,7 @@ function excluirPasto(id){
     aviso = "⚠️ ATENÇÃO: Existem " + animaisNoPasto.length + " animal(is) cadastrados no pasto \"" + p.nome + "\".\n\nAo excluir este pasto, esses animais passarão a constar como 'Sem pasto'.\n\nDeseja realmente excluir?";
   }
 
-  if (!confirm(aviso)) return;
+  if (!await appConfirm(aviso)) return;
 
   if (animaisNoPasto.length > 0) {
     animaisNoPasto.forEach(function(a){ a.lote = ""; });
@@ -2286,9 +2384,9 @@ if ($("mover_modo_qtd")) $("mover_modo_qtd").onchange = function(){
 if ($("moverQtdNum")) $("moverQtdNum").oninput = atualizarMoverInfo;
 
 if ($("moverDestino")) {
-  $("moverDestino").onchange = function(){
+  $("moverDestino").onchange = async function(){
     if (this.value === "__novo__") {
-      var nome = prompt("🌿 Cadastrar Novo Pasto de Destino\n\nInforme o nome do pasto ou piquete:\n(Ex.: Piquete 3, Retiro, Pasto da Mata)");
+      var nome = await appPrompt("🌿 Cadastrar Novo Pasto de Destino\n\nInforme o nome do pasto ou piquete:\n(Ex.: Piquete 3, Retiro, Pasto da Mata)");
       if (nome && nome.trim()) {
         nome = nome.trim();
         var existe = pastosList.some(function(p){ return p.nome.toLowerCase() === nome.toLowerCase(); });
@@ -2319,11 +2417,11 @@ if ($("btnSalvarPasto")) $("btnSalvarPasto").onclick = salvarPasto;
 
 // Botão de cadastro rápido de pasto na tela de animal (+ Pasto)
 if ($("btnCadPastoRapido")) {
-  $("btnCadPastoRapido").onclick = function(){
-    var nome = prompt("🌿 Cadastrar Novo Pasto\n\n1. Informe o nome do pasto ou piquete:\n(Ex.: Pasto 1, Pasto da Represa, Retiro)");
+  $("btnCadPastoRapido").onclick = async function(){
+    var nome = await appPrompt("🌿 Cadastrar Novo Pasto\n\n1. Informe o nome do pasto ou piquete:\n(Ex.: Pasto 1, Pasto da Represa, Retiro)");
     if (!nome || !nome.trim()) return;
     nome = nome.trim();
-    var qtdPrompt = prompt("2. Quantidade de cabeças neste pasto:\n(Ex.: 30)", "0");
+    var qtdPrompt = await appPrompt("2. Quantidade de cabeças neste pasto:\n(Ex.: 30)", "0");
     var qtdNum = qtdPrompt ? parseInt(qtdPrompt, 10) : 0;
     if (isNaN(qtdNum) || qtdNum < 0) qtdNum = 0;
 
@@ -2363,7 +2461,7 @@ $("btnFecharMoverPasto").onclick = function(){
   $("boxMoverPasto").hidden = true;
 };
 
-$("btnConfirmarMoverPasto").onclick = function(){
+$("btnConfirmarMoverPasto").onclick = async function(){
   var orig = $("moverOrigem").value;
   var dest = $("moverDestino").value.trim();
 
@@ -2410,7 +2508,7 @@ $("btnConfirmarMoverPasto").onclick = function(){
   var nmDest = /^d+$/.test(dest) ? "Pasto " + dest : dest;
 
   var msgConfirma = "Confirma a transferência de " + qtdMover + " cabeça(s) do \"" + nmOrig + "\" para o \"" + nmDest + "\"?";
-  if (!confirm(msgConfirma)) return;
+  if (!await appConfirm(msgConfirma)) return;
 
   var moverObsTexto = $("mover_obs") ? $("mover_obs").value.trim() : "";
 
@@ -2575,7 +2673,7 @@ function editar(id){
   show("cad");
 }
 
-$("salvar").onclick = function(){
+$("salvar").onclick = async function(){
   var b = $("f_brinco").value.trim();
   var mae = $("f_mae").value.trim();
   var ctrl = $("f_controle").value.trim();
@@ -2606,7 +2704,7 @@ $("salvar").onclick = function(){
 
   // Verifica duplicidade
   var dup = animais.some(function(a){ return a.brinco === b && a.id !== editId; });
-  if (dup && !confirm("Já existe um animal com o brinco #" + b + ". Salvar mesmo assim?")) {
+  if (dup && !await appConfirm("Já existe um animal com o brinco #" + b + ". Salvar mesmo assim?")) {
     return;
   }
 
@@ -2643,8 +2741,8 @@ $("salvar").onclick = function(){
 
 $("cancelar").onclick = function(){ show("reb"); };
 
-$("excluir").onclick = function(){
-  if (!confirm("Tem certeza que deseja apagar o cadastro deste animal permanentemente?")) {
+$("excluir").onclick = async function(){
+  if (!await appConfirm("Tem certeza que deseja apagar o cadastro deste animal permanentemente?")) {
     return;
   }
 
@@ -3190,7 +3288,7 @@ if ($("bkDownload")) {
 }
 
 if ($("bkRest")) {
-  $("bkRest").onclick = function(){
+  $("bkRest").onclick = async function(){
     var t = $("bkTxt");
     if (t.hidden || !t.value.trim()) {
       t.hidden = false;
@@ -3217,7 +3315,7 @@ if ($("bkRest")) {
         throw 0;
       }
 
-      if (confirm("Deseja restaurar os dados do backup (" + qtdAnimais + " animais, " + qtdChuvas + " chuvas e " + qtdMaq + " máquinas)?")) {
+      if (await appConfirm("Deseja restaurar os dados do backup (" + qtdAnimais + " animais, " + qtdChuvas + " chuvas e " + qtdMaq + " máquinas)?")) {
         save();
         saveChuvas();
         saveMaquinas();
@@ -3365,8 +3463,8 @@ $("btnSalvarChuva").onclick = function(){
   renderPluv();
 };
 
-window.excluirChuva = function(id){
-  if (!confirm("Deseja apagar este registro de chuva?")) {
+window.excluirChuva = async function(id){
+  if (!await appConfirm("Deseja apagar este registro de chuva?")) {
     return;
   }
 
@@ -3611,10 +3709,10 @@ window.editarMaq = function(id){
   $("boxLancMaq").hidden = true;
 };
 
-window.excluirMaq = function(id){
+window.excluirMaq = async function(id){
   var maq = maquinas.filter(function(m){ return m.id === id; })[0];
   if (!maq) return;
-  if (!confirm("Deseja realmente apagar o cadastro de " + maq.nome + " e todo o seu histórico de lançamentos?")) {
+  if (!await appConfirm("Deseja realmente apagar o cadastro de " + maq.nome + " e todo o seu histórico de lançamentos?")) {
     return;
   }
 
@@ -3767,8 +3865,8 @@ $("btnSalvarLanc").onclick = function(){
   alert("✅ Registro salvo com sucesso!");
 };
 
-window.excluirLanc = function(id){
-  if (!confirm("Deseja apagar este registro de horímetro/km?")) {
+window.excluirLanc = async function(id){
+  if (!await appConfirm("Deseja apagar este registro de horímetro/km?")) {
     return;
   }
 
