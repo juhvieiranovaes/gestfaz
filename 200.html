@@ -1,0 +1,2928 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GESTFAZ - Controle de Rebanho</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GESTFAZ">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0d8849">
+<link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
+<link rel="apple-touch-icon" sizes="192x192" href="./icon-192.png">
+<link rel="apple-touch-icon" sizes="512x512" href="./icon-512.png">
+<link rel="manifest" href="./manifest.json">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#f5faf7;
+  --card:#ffffff;
+  --tx:#142218;
+  --mut:#526658;
+  --ac:#0d8849;
+  --ac-light:#e6f7ee;
+  --acx:#ffffff;
+  --bd:#cee0d4;
+  --bad:#be2617;
+  --bad-bg:#fdeeed;
+  --warn:#996500;
+  --warn-bg:#fdf5e6;
+  --blue:#1873b9;
+  --blue-bg:#edf5fc;
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0f1712;
+  --card:#18241c;
+  --tx:#edf7f1;
+  --mut:#8da392;
+  --ac:#2ecc71;
+  --ac-light:#13371f;
+  --acx:#061a0c;
+  --bd:#263c2d;
+  --bad:#f27464;
+  --bad-bg:#2f1715;
+  --warn:#f1be4b;
+  --warn-bg:#2f240c;
+  --blue:#52b0f4;
+  --blue-bg:#122638;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0f1712;
+    --card:#18241c;
+    --tx:#edf7f1;
+    --mut:#8da392;
+    --ac:#2ecc71;
+    --ac-light:#13371f;
+    --acx:#061a0c;
+    --bd:#263c2d;
+    --bad:#f27464;
+    --bad-bg:#2f1715;
+    --warn:#f1be4b;
+    --warn-bg:#2f240c;
+    --blue:#52b0f4;
+    --blue-bg:#122638;
+  }
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;max-width:760px;margin-inline:auto;padding:12px 12px 100px}
+header{display:flex;align-items:center;justify-content:space-between;margin:6px 0 14px}
+.logo{font-size:24px;font-weight:800;color:var(--ac);display:flex;align-items:center;gap:8px;letter-spacing:-0.5px}
+.sublogo{font-size:13px;color:var(--mut);font-weight:normal}
+h2{font-size:18px;margin:18px 0 8px;font-weight:700}
+h3{font-size:15px;margin:12px 0 6px;color:var(--mut);text-transform:uppercase;letter-spacing:0.5px}
+
+.tabs{display:flex;gap:5px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding:8px 0;z-index:20;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.tabs button{flex:1;min-width:max-content;font-weight:600;font-size:14px;padding:8px 10px}
+button,input,select,textarea{font:inherit;color:inherit}
+button{background:var(--card);border:2px solid var(--bd);border-radius:12px;padding:12px;min-height:48px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:0.15s ease}
+button:active{transform:scale(0.98)}
+button.on,button.pri{background:var(--ac);color:var(--acx);border-color:var(--ac);font-weight:700}
+button.sec{background:var(--ac-light);color:var(--ac);border-color:var(--ac)}
+button.bad{border-color:var(--bad);color:var(--bad);background:transparent}
+button.bad-fill{background:var(--bad);color:#fff;border-color:var(--bad)}
+button.sm{min-height:36px;padding:6px 12px;font-size:13px;border-radius:8px}
+
+input,select,textarea{width:100%;background:var(--card);border:2px solid var(--bd);border-radius:10px;padding:11px 12px;min-height:46px}
+input:focus,select:focus,textarea:focus{border-color:var(--ac);outline:none}
+label{display:block;font-size:13px;font-weight:600;color:var(--mut);margin:10px 0 4px}
+
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin:9px 0;box-shadow:0 1px 3px rgba(0,0,0,0.02)}
+.card.highlight{border-left:4px solid var(--ac)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.n{font-size:30px;font-weight:800;color:var(--ac);line-height:1}
+.mut{color:var(--mut);font-size:14px}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.clickable{cursor:pointer}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+.tag{font-size:12px;padding:3px 8px;border-radius:99px;border:1px solid var(--bd);color:var(--mut);display:inline-flex;align-items:center;gap:4px}
+.tag.morto{color:var(--bad);border-color:var(--bad);background:var(--bad-bg)}
+.tag.vendido{color:var(--warn);border-color:var(--warn);background:var(--warn-bg)}
+.tag.iatf{color:var(--blue);border-color:var(--blue);background:var(--blue-bg)}
+.tag.vacina{color:var(--ac);border-color:var(--ac);background:var(--ac-light)}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.bar{display:flex;gap:8px;margin-top:14px}.bar>*{flex:1}
+table{width:100%;border-collapse:collapse;font-size:14px}
+td,th{padding:8px 6px;border-bottom:1px solid var(--bd);text-align:left}
+th{color:var(--mut);font-weight:600}
+pre{white-space:pre-wrap;background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:12px;font:13px/1.45 ui-monospace,monospace}
+.box-section{background:var(--ac-light);border:1px dashed var(--ac);border-radius:12px;padding:12px;margin:12px 0}
+.list-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--bd)}
+.list-item:last-child{border-bottom:none}
+[hidden]{display:none!important}
+
+.modal-backdrop{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.65);display:flex;align-items:center;justify-content:center;z-index:9999;padding:16px;backdrop-filter:blur(3px)}
+.modal-card{background:var(--card);color:var(--tx);border:1px solid var(--bd);border-radius:14px;max-width:440px;width:100%;padding:20px;box-shadow:0 12px 35px rgba(0,0,0,0.3);max-height:90vh;overflow-y:auto}
+
+/* Estilos de Impressão e PDF */
+@media print{
+  .tabs,.noprint,header button{display:none!important}
+  body{padding:0;max-width:100%;background:#fff;color:#000}
+  .card{border:1px solid #ccc;box-shadow:none;page-break-inside:avoid}
+  #pdfEditorArea{border:none;padding:0}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">🐂 GESTFAZ</div>
+    <div class="sublogo">Controle e Manejo de Rebanho</div>
+  </div>
+  <div style="display:flex;gap:6px;align-items:center">
+    <button id="btnAuth" class="sm sec" title="Minha Conta / Entrar / Sincronizar">👤 Entrar</button>
+    <button id="btnSyncNuvem" class="sm" title="Sincronizar com Banco de Dados na Nuvem (Supabase)">☁️ Nuvem</button>
+    <button id="btnTema" class="sm" title="Alternar Modo Claro / Escuro">🌙 Escuro</button>
+    <button id="btnSobre" class="sm" title="Ajuda">Ajuda</button>
+  </div>
+</header>
+
+<div id="syncStatusBanner" class="noprint" hidden style="font-size:13px;padding:6px 14px;background:var(--ac-light);color:var(--tx);text-align:center;border-bottom:1px solid var(--bd);font-weight:600"></div>
+
+<!-- MODAL DE AUTENTICAÇÃO (CONTA / LOGIN / CADASTRO / RECUPERAÇÃO) -->
+<div id="authModal" class="modal-backdrop noprint" hidden>
+  <div class="modal-card">
+    <div class="row" style="margin-bottom:12px">
+      <b style="font-size:18px" id="authModalTit">👤 Minha Conta GESTFAZ</b>
+      <button id="btnFecharAuth" class="sm bad" type="button" style="min-height:30px;padding:2px 8px">✕ Fechar</button>
+    </div>
+
+    <!-- TELA 1: QUANDO ESTIVER LOGADO -->
+    <div id="authViewLogado" hidden>
+      <div class="card" style="background:var(--ac-light);border:1px solid var(--ac);text-align:center;padding:16px">
+        <div style="font-size:32px;margin-bottom:6px">🤠</div>
+        <div style="font-weight:700;font-size:16px" id="authLogadoEmail">usuario@email.com</div>
+        <div class="mut" style="font-size:12px;margin-top:2px">Conta ativa e conectada à nuvem Supabase</div>
+      </div>
+      <div class="mut" style="font-size:13px;margin:12px 0">
+        ✅ <b>Seus dados estão protegidos na nuvem:</b> ao trocar de celular ou acessar pelo computador, basta entrar com seu e-mail e senha para carregar automaticamente todo o seu rebanho e lançamentos!
+      </div>
+      <div class="bar">
+        <button id="btnAuthSyncNow" class="pri" type="button">🔄 Sincronizar Agora</button>
+        <button id="btnAuthLogout" class="sec" type="button">🚪 Sair da Conta</button>
+      </div>
+      <div style="margin-top:18px;border-top:1px solid var(--bd);padding-top:14px;text-align:center">
+        <button id="btnAuthDeleteAccount" class="sm bad" type="button" style="width:100%;font-size:13px">🗑️ Excluir Minha Conta Permanentemente</button>
+      </div>
+    </div>
+
+    <!-- TELA 2: QUANDO NÃO ESTIVER LOGADO -->
+    <div id="authViewDeslogado">
+      <div style="display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--bd);padding-bottom:6px">
+        <button id="tabAuthLogin" class="sm on" type="button" style="flex:1">Entrar</button>
+        <button id="tabAuthSignup" class="sm" type="button" style="flex:1">Criar Conta</button>
+        <button id="tabAuthRecover" class="sm" type="button" style="flex:1">Recuperar</button>
+      </div>
+
+      <!-- PAINEL: ENTRAR -->
+      <div id="panelAuthLogin">
+        <div class="mut" style="font-size:13px;margin-bottom:10px">Entre para sincronizar seus animais e máquinas com a nuvem.</div>
+        <label>E-mail</label>
+        <input id="loginEmail" type="email" placeholder="seuemail@exemplo.com" autocomplete="email">
+        <label>Senha</label>
+        <input id="loginPass" type="password" placeholder="Sua senha" autocomplete="current-password">
+        <div class="bar">
+          <button id="btnLoginSubmit" class="pri" type="button">Entrar no GESTFAZ</button>
+        </div>
+        <div style="margin-top:14px;text-align:center;font-size:13px">
+          <a href="javascript:void(0)" id="linkIrParaRecuperar" style="color:var(--ac);text-decoration:none">Esqueceu a senha? Clique aqui</a>
+        </div>
+      </div>
+
+      <!-- PAINEL: CRIAR CONTA -->
+      <div id="panelAuthSignup" hidden>
+        <div class="mut" style="font-size:13px;margin-bottom:10px">Crie sua conta para proteger seus dados e sincronizar entre vários celulares.</div>
+        <label>Seu E-mail</label>
+        <input id="signupEmail" type="email" placeholder="seuemail@exemplo.com" autocomplete="email">
+        <label>Criar Senha (mínimo 6 dígitos)</label>
+        <input id="signupPass" type="password" placeholder="Crie uma senha segura" autocomplete="new-password">
+        <label>Confirmar Senha</label>
+        <input id="signupPassConf" type="password" placeholder="Repita a senha" autocomplete="new-password">
+        <div class="bar">
+          <button id="btnSignupSubmit" class="pri" type="button">Criar Conta Gratuita</button>
+        </div>
+      </div>
+
+      <!-- PAINEL: RECUPERAR SENHA -->
+      <div id="panelAuthRecover" hidden>
+        <div class="mut" style="font-size:13px;margin-bottom:10px">Digite seu e-mail cadastrado. Enviaremos um link seguro para você redefinir sua senha.</div>
+        <label>E-mail Cadastrado</label>
+        <input id="recoverEmail" type="email" placeholder="seuemail@exemplo.com" autocomplete="email">
+        <div class="bar">
+          <button id="btnRecoverSubmit" class="pri" type="button">Enviar Link de Recuperação</button>
+        </div>
+        <div style="margin-top:14px;text-align:center;font-size:13px">
+          <a href="javascript:void(0)" id="linkVoltarLogin" style="color:var(--ac);text-decoration:none">Lembrou a senha? Voltar ao login</a>
+        </div>
+      </div>
+
+      <div id="authMsg" class="mut" style="margin-top:12px;text-align:center;font-size:13px"></div>
+    </div>
+  </div>
+</div>
+
+<div class="tabs noprint">
+  <button data-t="reb" class="on">Rebanho</button>
+  <button data-t="cad">+ Animal</button>
+  <button data-t="maq">🚜 Máquinas</button>
+  <button data-t="pluv">🌧️ Chuva</button>
+  <button data-t="rel">Relatórios</button>
+</div>
+
+<!-- ==================== ABA 1: REBANHO ==================== -->
+<section id="reb">
+  <div class="grid">
+    <div class="card"><div class="mut">Animais Ativos</div><div class="n" id="total">0</div></div>
+    <div class="card"><div class="mut">Fêmeas</div><div class="n" id="totalFem">0</div></div>
+    <div class="card"><div class="mut">Machos</div><div class="n" id="totalMasc">0</div></div>
+    <div class="card"><div class="mut">Peso Médio</div><div class="n" id="pesoMedio" style="font-size:24px">—</div></div>
+  </div>
+
+  <div class="row" style="margin-top:18px;flex-wrap:wrap;gap:8px">
+    <h2 style="margin:0">Pastos / Lotes</h2>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button id="btnNovoNascReb" class="sm pri" type="button" style="background:var(--ac);color:#fff">🐮 Registrar Nascimento</button>
+      <button id="btnAbrirMoverPasto" class="sm sec" type="button">🔄 Mover de Pasto</button>
+    </div>
+  </div>
+  <div class="mut" style="margin-bottom:8px">Toque no pasto para filtrar os animais:</div>
+  <div id="pastos"></div>
+
+  <!-- CAIXA DE MOVER PASTO EM MASSA -->
+  <div id="boxMoverPasto" class="card highlight" hidden style="margin:12px 0;background:var(--ac-light);border:2px solid var(--ac)">
+    <div class="row">
+      <b style="font-size:16px;color:var(--ac)">🔄 Transferência de Pasto em Massa</b>
+      <button id="btnFecharMoverPasto" class="sm bad" type="button" style="min-height:30px;padding:2px 8px">✕ Fechar</button>
+    </div>
+    <div class="mut" style="margin:6px 0 10px">Mova todos os animais de um pasto para outro de uma só vez:</div>
+    <div class="two">
+      <div>
+        <label style="margin-top:0">Pasto de Origem (Sair de):</label>
+        <select id="moverOrigem"></select>
+      </div>
+      <div>
+        <label style="margin-top:0">Pasto de Destino (Ir para):</label>
+        <input id="moverDestino" list="lotes" placeholder="Ex.: Pasto 4, Piquete 2">
+      </div>
+    </div>
+    <div id="moverInfo" class="mut" style="margin:10px 0;font-weight:600"></div>
+    <div class="bar" style="margin-top:6px">
+      <button id="btnConfirmarMoverPasto" class="pri" type="button">✅ Confirmar Transferência</button>
+    </div>
+  </div>
+
+  <h2>Buscar no Rebanho</h2>
+  <input id="busca" inputmode="search" placeholder="Buscar por brinco, nº de controle, apelido, raça, pasto...">
+  <div class="two" style="margin-top:8px">
+    <select id="filtroStatus">
+      <option value="ativo">Situação: Só Ativos</option>
+      <option value="todos">Situação: Todos (inclui baixas)</option>
+      <option value="morto">Situação: Mortos</option>
+      <option value="vendido">Situação: Vendidos</option>
+    </select>
+    <select id="filtroRepro">
+      <option value="todos">Reprodução: Todos</option>
+      <option value="prenhe">Só Prenhes</option>
+      <option value="inseminada">Só Inseminadas</option>
+      <option value="vazia">Só Vazias</option>
+    </select>
+  </div>
+
+  <div id="lista" style="margin-top:12px"></div>
+
+  <div class="card noprint" style="margin-top:24px">
+    <h3>Exportação Rápida</h3>
+    <div class="bar">
+      <button id="btnExcelTopo" class="sec">📊 Baixar Excel (.CSV)</button>
+      <button id="btnPdfTopo" class="sec">📄 Gerar / Editar PDF</button>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== ABA 2: CADASTRO / EDIÇÃO ==================== -->
+<section id="cad" hidden>
+  <h2 id="cadTit">Novo Animal</h2>
+  
+  <div id="infoBezerroAviso" class="card highlight" hidden style="margin-bottom:14px;background:var(--ac-light);border:1.5px solid var(--ac);padding:10px 14px">
+    <div style="font-weight:700;color:var(--ac)">🐮 Cadastro de Nascimento de Bezerro</div>
+    <div class="mut" style="font-size:13px;margin-top:4px">
+      Bezerros recém-nascidos não precisam de brinco agora. Deixe o campo <b>Número do Brinco</b> vazio e informe o <b>Brinco da Mãe ou Número da Mãe</b>. O sistema gerará a identificação provisória (ex: <b>Bez-104</b>). Ao desmamar, basta editar este animal e colocar o brinco definitivo.
+    </div>
+  </div>
+
+  <div class="two">
+    <div>
+      <label>Número do Brinco <span class="mut" style="font-weight:normal">(ou deixe vazio se bezerro)</span></label>
+      <input id="f_brinco" inputmode="numeric" placeholder="Ex.: 1045 (vazio = gera Bez-Mãe)">
+    </div>
+    <div>
+      <label>Nº de Controle (opcional)</label>
+      <input id="f_controle" placeholder="Ex.: 42, C-10">
+    </div>
+  </div>
+
+  <div class="two">
+    <div>
+      <label>Apelido (opcional)</label>
+      <input id="f_apelido" placeholder="Ex.: Estrela">
+    </div>
+    <div>
+      <label>Peso (kg) (opcional)</label>
+      <input id="f_peso" type="number" step="0.5" inputmode="decimal" placeholder="Ex.: 435.5">
+    </div>
+  </div>
+
+  <div class="two">
+    <div>
+      <label>Sexo</label>
+      <select id="f_sexo">
+        <option value="Fêmea">Fêmea</option>
+        <option value="Macho">Macho</option>
+      </select>
+    </div>
+    <div>
+      <label>Raça</label>
+      <input id="f_raca" list="racas" placeholder="Ex.: Nelore, Angus, Girolando">
+      <datalist id="racas">
+        <option value="Nelore">
+        <option value="Angus">
+        <option value="Brahman">
+        <option value="Brangus">
+        <option value="Senepol">
+        <option value="Girolando">
+        <option value="Holandês">
+        <option value="Cruzamento Industrial">
+      </datalist>
+    </div>
+  </div>
+
+  <div class="two">
+    <div>
+      <label>Data de Nascimento</label>
+      <input id="f_nasc" type="date">
+    </div>
+    <div>
+      <label>Brinco da Mãe ou Número da Mãe <span class="mut" style="font-weight:normal">(obrigatório se bezerro s/ brinco)</span></label>
+      <input id="f_mae" inputmode="numeric" placeholder="Ex.: 104 (obrigatório se s/ brinco)">
+    </div>
+  </div>
+
+  <label>Pasto / Lote</label>
+  <input id="f_lote" list="lotes" placeholder="Ex.: Pasto 3, Confinamento, Piquete 1">
+  <datalist id="lotes"></datalist>
+
+  <!-- SEÇÃO DE INSEMINAÇÃO (IATF) - VISÍVEL PREFERENCIALMENTE PARA FÊMEAS -->
+  <div id="boxIatf" class="box-section">
+    <div style="font-weight:700;color:var(--blue);margin-bottom:6px">🧬 Inseminação Artificial / IATF</div>
+    <div class="two">
+      <div>
+        <label>Situação Reprodutiva</label>
+        <select id="f_repro_status">
+          <option value="">Não informado</option>
+          <option value="Vazia">Vazia</option>
+          <option value="Inseminada">Inseminada</option>
+          <option value="Prenhe">Prenhe</option>
+          <option value="Parida">Parida</option>
+        </select>
+      </div>
+      <div>
+        <label>Touro / Sêmen</label>
+        <input id="f_iatf_touro" placeholder="Nome ou Brinco do Touro">
+      </div>
+    </div>
+    <div class="three" style="margin-top:6px">
+      <div>
+        <label>1. Implantou</label>
+        <input id="f_iatf_implante" type="date" title="Data do Implante">
+      </div>
+      <div>
+        <label>2. Retirou</label>
+        <input id="f_iatf_retirada" type="date" title="Data da Retirada do Implante">
+      </div>
+      <div>
+        <label>3. Inseminou</label>
+        <input id="f_iatf_insem" type="date" title="Data da Inseminação">
+      </div>
+    </div>
+  </div>
+
+  <!-- SEÇÃO DE VACINAÇÃO -->
+  <div class="box-section">
+    <div style="font-weight:700;color:var(--ac);margin-bottom:6px">💉 Vacinação e Medicamentos</div>
+    <div class="two">
+      <div>
+        <label>Vacina / Medicamento</label>
+        <input id="f_vac_nome" list="listaVacinas" placeholder="Ex.: Febre Aftosa, Clostridiose">
+        <datalist id="listaVacinas">
+          <option value="Febre Aftosa">
+          <option value="Clostridiose (Poli-Star/Sintox)">
+          <option value="Brucelose (B19/RB51)">
+          <option value="Raiva Herbívoros">
+          <option value="Botulismo">
+          <option value="Carrapaticida / Pour-on">
+          <option value="Vermífugo / Ivermectina">
+        </datalist>
+      </div>
+      <div>
+        <label>Data da Aplicação</label>
+        <input id="f_vac_data" type="date">
+      </div>
+    </div>
+    <div style="margin-top:8px;text-align:right">
+      <button id="btnAddVac" type="button" class="sm sec">+ Registrar Vacina</button>
+    </div>
+    <div id="vacinasAplicadas" style="margin-top:8px"></div>
+  </div>
+
+  <label>Situação do Animal</label>
+  <select id="f_status">
+    <option value="ativo">Ativo (no rebanho)</option>
+    <option value="morto">Morto (baixa por morte)</option>
+    <option value="vendido">Vendido (baixa por venda)</option>
+  </select>
+
+  <div id="saidaBox" hidden>
+    <div class="two">
+      <div>
+        <label>Data da Saída / Baixa</label>
+        <input id="f_saida" type="date">
+      </div>
+      <div>
+        <label>Motivo da Baixa</label>
+        <input id="f_motivo" placeholder="Ex.: Venda frigorífico, pneumonia, picada de cobra...">
+      </div>
+    </div>
+  </div>
+
+  <label>Observações Gerais</label>
+  <textarea id="f_obs" rows="3" placeholder="Informações de pelagem, temperamento, tratamentos..."></textarea>
+
+  <div class="bar">
+    <button id="salvar" class="pri">💾 Salvar Animal</button>
+    <button id="cancelar">Cancelar</button>
+  </div>
+  <div class="bar">
+    <button id="excluir" class="bad" hidden>🗑️ Apagar Animal</button>
+  </div>
+  <div id="msg" class="mut" style="margin-top:8px;text-align:center"></div>
+</section>
+
+<!-- ==================== ABA: MÁQUINAS / HORÍMETRO / QUILOMETRAGEM ==================== -->
+<section id="maq" hidden>
+  <div class="row">
+    <div>
+      <h2 style="margin:0">🚜 Máquinas, Tratores & Veículos</h2>
+      <div class="mut">Controle de horímetro, quilometragem e manutenções</div>
+    </div>
+  </div>
+
+  <div class="grid" style="margin-top:12px">
+    <div class="card"><div class="mut">Máquinas Cadastradas</div><div class="n" id="totalMaq">0</div></div>
+    <div class="card"><div class="mut">Horas no Mês</div><div class="n" id="totalHorasMes" style="font-size:24px">0 h</div></div>
+    <div class="card"><div class="mut">Km Rodados no Mês</div><div class="n" id="totalKmMes" style="font-size:24px">0 km</div></div>
+  </div>
+
+  <div class="bar" style="margin-top:14px">
+    <button id="btnAbrirNovoMaq" class="pri">+ Nova Máquina / Veículo</button>
+    <button id="btnAbrirLancMaq" class="sec">⏱️ Lançar Horímetro / Km</button>
+  </div>
+
+  <!-- FORMULÁRIO: CADASTRO / EDIÇÃO DE MÁQUINA -->
+  <div id="boxCadMaq" class="card highlight" hidden style="margin-top:16px;background:var(--ac-light);border:2px solid var(--ac)">
+    <div class="row">
+      <b style="font-size:16px;color:var(--ac)" id="titCadMaq">🚜 Cadastrar Máquina ou Veículo</b>
+      <button id="btnFecharCadMaq" class="sm bad" type="button" style="min-height:30px;padding:2px 8px">✕ Cancelar</button>
+    </div>
+    
+    <label>Nome / Modelo do Maquinário *</label>
+    <input id="m_nome" placeholder="Ex.: Trator John Deere 6110, Hilux Prata, Massey 4292">
+
+    <div class="two">
+      <div>
+        <label>Tipo de Equipamento</label>
+        <select id="m_tipo">
+          <option value="Trator">🚜 Trator</option>
+          <option value="Caminhonete">🛻 Caminhonete / Carro</option>
+          <option value="Caminhão">🚛 Caminhão</option>
+          <option value="Colheitadeira">🌾 Colheitadeira</option>
+          <option value="Pá Carregadeira">🚜 Pá Carregadeira / Retro</option>
+          <option value="Moto">🏍️ Moto da Fazenda</option>
+          <option value="Gerador / Bomba">⚙️ Gerador / Bomba</option>
+          <option value="Outro">🔧 Outro Equipamento</option>
+        </select>
+      </div>
+      <div>
+        <label>Tipo de Medição</label>
+        <select id="m_medicao">
+          <option value="Horímetro">⏱️ Horímetro (Horas)</option>
+          <option value="Quilometragem">🛣️ Odômetro (Km)</option>
+          <option value="Ambos">⏱️ + 🛣️ Ambos (Horas e Km)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="two">
+      <div>
+        <label>Horímetro Inicial (h)</label>
+        <input id="m_horimetro_ini" type="number" step="0.1" min="0" placeholder="Ex.: 1250.5" inputmode="decimal">
+      </div>
+      <div>
+        <label>Km Inicial (km)</label>
+        <input id="m_km_ini" type="number" step="1" min="0" placeholder="Ex.: 85000" inputmode="numeric">
+      </div>
+    </div>
+
+    <div class="two">
+      <div>
+        <label>Placa / Prefixo (opcional)</label>
+        <input id="m_placa" placeholder="Ex.: ABC-1234, T-02">
+      </div>
+      <div>
+        <label>Operador / Responsável Principal</label>
+        <input id="m_operador_padrao" placeholder="Ex.: João Vaqueiro, Zé do Trator">
+      </div>
+    </div>
+
+    <label>Observações do Equipamento</label>
+    <textarea id="m_obs" rows="2" placeholder="Ano de fabricação, filtros usados, especificações..."></textarea>
+
+    <div class="bar" style="margin-top:12px">
+      <button id="btnSalvarMaq" class="pri">💾 Salvar Equipamento</button>
+      <button id="btnCancelarMaq">Cancelar</button>
+    </div>
+    <div id="m_msg" class="mut" style="margin-top:6px;text-align:center"></div>
+  </div>
+
+  <!-- FORMULÁRIO: LANÇAMENTO DE HORÍMETRO / KM -->
+  <div id="boxLancMaq" class="card highlight" hidden style="margin-top:16px;background:var(--blue-bg);border:2px solid var(--blue)">
+    <div class="row">
+      <b style="font-size:16px;color:var(--blue)">⏱️ Registrar Uso / Horímetro / Km</b>
+      <button id="btnFecharLancMaq" class="sm bad" type="button" style="min-height:30px;padding:2px 8px">✕ Cancelar</button>
+    </div>
+
+    <label>Selecione a Máquina / Veículo *</label>
+    <select id="l_maq_id"></select>
+    <div id="l_maq_info" class="mut" style="font-size:13px;margin:4px 0 8px"></div>
+
+    <div class="two">
+      <div>
+        <label>Data do Registro *</label>
+        <input id="l_data" type="date">
+      </div>
+      <div>
+        <label>Atividade / Serviço Feito</label>
+        <input id="l_atividade" list="listaAtividades" placeholder="Ex.: Gradagem, Roçada, Transporte">
+        <datalist id="listaAtividades">
+          <option value="Gradagem de Pasto">
+          <option value="Roçada / Limpeza de Pasto">
+          <option value="Plantio / Semeadura">
+          <option value="Pulverização / Adubação">
+          <option value="Transporte de Sal / Ração">
+          <option value="Revisão / Troca de Óleo e Filtros">
+          <option value="Abastecimento">
+          <option value="Manutenção Mecânica">
+        </datalist>
+      </div>
+    </div>
+
+    <div class="two">
+      <div>
+        <label>Horímetro Marcado (h)</label>
+        <input id="l_horimetro" type="number" step="0.1" min="0" placeholder="Ex.: 1264.8" inputmode="decimal">
+      </div>
+      <div>
+        <label>Quilometragem Marcada (km)</label>
+        <input id="l_km" type="number" step="1" min="0" placeholder="Ex.: 85320" inputmode="numeric">
+      </div>
+    </div>
+
+    <div class="two">
+      <div>
+        <label>Operador / Motorista</label>
+        <input id="l_operador" placeholder="Nome de quem operou">
+      </div>
+      <div>
+        <label>Observação / Detalhes</label>
+        <input id="l_obs" placeholder="Combustível, condição do pasto, etc.">
+      </div>
+    </div>
+
+    <div class="bar" style="margin-top:12px">
+      <button id="btnSalvarLanc" class="pri" style="background:var(--blue);border-color:var(--blue)">💾 Salvar Registro de Uso</button>
+      <button id="btnCancelarLanc">Cancelar</button>
+    </div>
+    <div id="l_msg" class="mut" style="margin-top:6px;text-align:center"></div>
+  </div>
+
+  <!-- LISTA DE MÁQUINAS -->
+  <h2 style="margin-top:24px">Máquinas e Veículos</h2>
+  <div id="listaMaquinas" style="margin-top:8px"></div>
+
+  <!-- HISTÓRICO DE LANÇAMENTOS -->
+  <div class="row" style="margin-top:24px">
+    <h2 style="margin:0">Últimos Lançamentos</h2>
+    <button id="btnExportarMaquinas" class="sm sec">📊 Baixar Planilha (.CSV)</button>
+  </div>
+  <div id="listaLancamentos" style="margin-top:8px"></div>
+</section>
+
+<!-- ==================== ABA 3: PLUVIÔMETRO / CHUVA ==================== -->
+<section id="pluv" hidden>
+  <h2>🌧️ Pluviômetro - Controle de Chuvas</h2>
+  
+  <div class="grid">
+    <div class="card">
+      <div class="mut">Chuva no Mês (<span id="pluvMesNome">—</span>)</div>
+      <div class="n" id="pluvTotalMes">0 mm</div>
+    </div>
+    <div class="card">
+      <div class="mut">Chuva no Ano (<span id="pluvAnoNome">—</span>)</div>
+      <div class="n" id="pluvTotalAno">0 mm</div>
+    </div>
+    <div class="card">
+      <div class="mut">Dias Chuvosos no Mês</div>
+      <div class="n" id="pluvDiasMes" style="font-size:24px">0 dias</div>
+    </div>
+  </div>
+
+  <!-- CADASTRO DE MEDIÇÃO -->
+  <div class="card highlight" style="margin-top:16px">
+    <h3 style="margin-top:0">Nova Medição de Chuva</h3>
+    <div class="two">
+      <div>
+        <label>Data da Medição *</label>
+        <input id="p_data" type="date">
+      </div>
+      <div>
+        <label>Volume de Chuva (mm) *</label>
+        <input id="p_mm" type="number" step="0.5" min="0" placeholder="Ex.: 25 ou 14.5" inputmode="decimal">
+      </div>
+    </div>
+    <div class="two">
+      <div>
+        <label>Local / Ponto de Coleta (opcional)</label>
+        <input id="p_local" list="locaisChuva" placeholder="Ex.: Sede, Retiro, Pasto Alto">
+        <datalist id="locaisChuva">
+          <option value="Sede da Fazenda">
+          <option value="Retiro">
+          <option value="Curral Principal">
+          <option value="Pasto 1">
+        </datalist>
+      </div>
+      <div>
+        <label>Observação (opcional)</label>
+        <input id="p_obs" placeholder="Ex.: Garoa fina, temporal, chuva forte">
+      </div>
+    </div>
+    <div class="bar">
+      <button id="btnSalvarChuva" class="pri">🌧️ Salvar Medição de Chuva</button>
+    </div>
+    <div id="p_msg" class="mut" style="margin-top:6px;text-align:center"></div>
+  </div>
+
+  <!-- GRÁFICO / RESUMO MENSAL DO ANO -->
+  <div class="card" style="margin-top:18px">
+    <div class="row">
+      <h3 style="margin:0">Distribuição Mensal de Chuvas</h3>
+      <select id="pluvFiltroAno" style="width:auto;min-height:36px;padding:4px 10px;font-size:14px"></select>
+    </div>
+    <div id="pluvGraficoBarras" style="margin-top:14px"></div>
+  </div>
+
+  <!-- HISTÓRICO DE CHUVAS -->
+  <div class="row" style="margin-top:20px">
+    <h2>Histórico de Medições</h2>
+    <button id="btnExportarChuvas" class="sm sec">📊 Baixar Chuvas (Excel)</button>
+  </div>
+  <div id="pluvHistorico" style="margin-top:8px"></div>
+</section>
+
+<!-- ==================== ABA 4: RELATÓRIOS / EXPORTAR / EDITAR PDF ==================== -->
+<section id="rel" hidden>
+  <h2>Relatórios e Exportação</h2>
+
+  <!-- SELETOR DO TIPO DE RELATÓRIO -->
+  <div style="display:flex;gap:6px;margin:10px 0 16px" class="noprint">
+    <button id="btnTipoRelGeral" class="on sm" type="button" style="flex:1">📊 Relatório Geral Integrado</button>
+    <button id="btnTipoRelNasc" class="sm" type="button" style="flex:1">🐮 Só Nascimentos</button>
+  </div>
+
+  <div id="boxAcaoNascRel" class="card noprint" hidden style="margin-bottom:14px;background:var(--ac-light);border:1.5px solid var(--ac);padding:10px 14px">
+    <div class="row" style="flex-wrap:wrap;gap:8px">
+      <div>
+        <b style="color:var(--ac)">🐮 Registrou novo nascimento na fazenda?</b>
+        <div class="mut" style="font-size:13px">Cadastre o bezerro informando apenas a mãe e a data.</div>
+      </div>
+      <button id="btnNovoNascRel" class="sm pri" type="button" style="min-width:140px;background:var(--ac);color:#fff">🐮 + Novo Nascimento</button>
+    </div>
+  </div>
+
+  <!-- EXPORTAÇÃO EXCEL -->
+  <div class="card highlight noprint">
+    <div class="row">
+      <div>
+        <b style="font-size:16px" id="txtExcelTit">📊 Exportar Planilha (.CSV)</b>
+        <div class="mut" id="txtExcelSub">Gera a planilha completa pronta para abrir no Excel.</div>
+      </div>
+      <button id="btnExportarExcel" class="pri" style="min-width:140px">Baixar Planilha</button>
+    </div>
+  </div>
+
+  <!-- TÍTULO DINÂMICO E FILTROS -->
+  <h2 id="relTituloSec">Balanço Mensal de Rebanho</h2>
+  <div class="row" style="margin-bottom:10px">
+    <div style="flex:1">
+      <label style="margin-top:0">Selecione o Mês / Ano:</label>
+      <input id="mes" type="month">
+    </div>
+    <div style="flex:1">
+      <label style="margin-top:0">Nome da Fazenda / Cabeçalho:</label>
+      <input id="fazendaNome" placeholder="Ex.: Fazenda Santa Fé">
+    </div>
+  </div>
+
+  <div id="relOut"></div>
+
+  <!-- EDITOR DO PDF -->
+  <h2 style="margin-top:24px">📄 Gerar e Editar PDF</h2>
+  <div class="mut" style="margin-bottom:6px">
+    Você pode <b>editar qualquer texto, adicionar observações do vaqueiro ou alterar títulos</b> diretamente na caixa abaixo antes de imprimir ou salvar como PDF:
+  </div>
+  
+  <textarea id="pdfEditorArea" rows="12" style="font-family:ui-monospace,monospace;font-size:14px;white-space:pre-wrap"></textarea>
+
+  <div class="bar noprint" style="margin-top:12px">
+    <button id="btnAtualizarTexto" class="sm">🔄 Recarregar Dados</button>
+    <button id="relCopy" class="pri">📲 Copiar para WhatsApp</button>
+    <button id="btnImprimirPdf" class="pri" style="background:#1d6fa5;border-color:#1d6fa5">🖨️ Imprimir / Salvar em PDF</button>
+  </div>
+</section>
+
+<script>
+var KEY = "gestfaz_rebanho_v2";
+var KEY_ANTIGA = "rebanho_v1";
+var KEY_CHUVAS = "gestfaz_chuvas_v1";
+var KEY_MAQUINAS = "gestfaz_maquinas_v1";
+var KEY_LANCS = "gestfaz_lancamentos_v1";
+
+var animais = [];
+var chuvas = [];
+var maquinas = [];
+var lancamentos = [];
+var editId = null;
+var editMaqId = null;
+var pastoSel = null;
+var vacinasTemp = []; // armazena vacinas do animal em edição
+
+function $(id){ return document.getElementById(id); }
+function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+
+function load(){
+  try {
+    var r = localStorage.getItem(KEY);
+    if (!r) {
+      r = localStorage.getItem(KEY_ANTIGA);
+      if (r) {
+        localStorage.setItem(KEY, r);
+      }
+    }
+    if (r) animais = JSON.parse(r) || [];
+  } catch(e) {
+    animais = [];
+  }
+
+  try {
+    var c = localStorage.getItem(KEY_CHUVAS);
+    if (c) chuvas = JSON.parse(c) || [];
+  } catch(e) {
+    chuvas = [];
+  }
+
+  try {
+    var mq = localStorage.getItem(KEY_MAQUINAS);
+    if (mq) maquinas = JSON.parse(mq) || [];
+  } catch(e) {
+    maquinas = [];
+  }
+
+  try {
+    var lc = localStorage.getItem(KEY_LANCS);
+    if (lc) lancamentos = JSON.parse(lc) || [];
+  } catch(e) {
+    lancamentos = [];
+  }
+}
+
+// ==================== CONFIGURAÇÃO SUPABASE (NUVEM & AUTH) ====================
+var SUPABASE_URL = "https://lnxpvmfhwexzskbqitbu.supabase.co";
+var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxueHB2bWZod2V4enNrYnFpdGJ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1MDk2MjksImV4cCI6MjExMDA4NTYyOX0.PFZmq4VCWdR7bnYJIuXLPBAMeMe7oBpx2YR02cC4f7A";
+
+var KEY_AUTH_USER = "gestfaz_auth_user_v1";
+var authUser = null;
+
+try {
+  var sUser = localStorage.getItem(KEY_AUTH_USER);
+  if (sUser) authUser = JSON.parse(sUser);
+} catch(e){}
+
+function atualizarBotaoAuth(){
+  var btn = $("btnAuth");
+  if (!btn) return;
+  if (authUser && authUser.email) {
+    var nomeCurto = authUser.email.split("@")[0];
+    btn.innerHTML = "👤 " + esc(nomeCurto);
+    btn.classList.add("pri");
+    btn.classList.remove("sec");
+    btn.title = "Conta: " + authUser.email;
+  } else {
+    btn.innerHTML = "👤 Entrar";
+    btn.classList.remove("pri");
+    btn.classList.add("sec");
+    btn.title = "Entrar ou Criar Conta";
+  }
+}
+
+function abrirModalAuth(){
+  $("authModal").hidden = false;
+  $("authMsg").textContent = "";
+  if (authUser && authUser.email) {
+    $("authModalTit").textContent = "👤 Minha Conta";
+    $("authViewLogado").hidden = false;
+    $("authViewDeslogado").hidden = true;
+    $("authLogadoEmail").textContent = authUser.email;
+  } else {
+    $("authModalTit").textContent = "👤 Acessar / Criar Conta";
+    $("authViewLogado").hidden = true;
+    $("authViewDeslogado").hidden = false;
+    $("tabAuthLogin").click();
+  }
+}
+
+function fecharModalAuth(){
+  $("authModal").hidden = true;
+}
+
+$("btnAuth").onclick = abrirModalAuth;
+$("btnFecharAuth").onclick = fecharModalAuth;
+
+// Abas de Auth
+$("tabAuthLogin").onclick = function(){
+  $("tabAuthLogin").classList.add("on");
+  $("tabAuthSignup").classList.remove("on");
+  $("tabAuthRecover").classList.remove("on");
+  $("panelAuthLogin").hidden = false;
+  $("panelAuthSignup").hidden = true;
+  $("panelAuthRecover").hidden = true;
+  $("authMsg").textContent = "";
+};
+
+$("tabAuthSignup").onclick = function(){
+  $("tabAuthSignup").classList.add("on");
+  $("tabAuthLogin").classList.remove("on");
+  $("tabAuthRecover").classList.remove("on");
+  $("panelAuthLogin").hidden = true;
+  $("panelAuthSignup").hidden = false;
+  $("panelAuthRecover").hidden = true;
+  $("authMsg").textContent = "";
+};
+
+$("tabAuthRecover").onclick = function(){
+  $("tabAuthRecover").classList.add("on");
+  $("tabAuthLogin").classList.remove("on");
+  $("tabAuthSignup").classList.remove("on");
+  $("panelAuthLogin").hidden = true;
+  $("panelAuthSignup").hidden = true;
+  $("panelAuthRecover").hidden = false;
+  $("authMsg").textContent = "";
+};
+
+$("linkIrParaRecuperar").onclick = function(){ $("tabAuthRecover").click(); };
+$("linkVoltarLogin").onclick = function(){ $("tabAuthLogin").click(); };
+
+// Entrar
+$("btnLoginSubmit").onclick = async function(){
+  var email = $("loginEmail").value.trim();
+  var pass = $("loginPass").value;
+  var msg = $("authMsg");
+  if (!email || !pass) {
+    msg.innerHTML = '<span style="color:var(--bad)">Por favor, informe e-mail e senha.</span>';
+    return;
+  }
+  msg.innerHTML = "⏳ Entrando...";
+  try {
+    var res = await fetch(SUPABASE_URL + "/auth/v1/token?grant_type=password", {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ email: email, password: pass })
+    });
+    var data = await res.json();
+    if (!res.ok) {
+      msg.innerHTML = '<span style="color:var(--bad)">❌ ' + esc(data.error_description || data.msg || "E-mail ou senha incorretos.") + '</span>';
+      return;
+    }
+    authUser = data.user;
+    if (data.access_token) authUser.access_token = data.access_token;
+    localStorage.setItem(KEY_AUTH_USER, JSON.stringify(authUser));
+    msg.innerHTML = '<span style="color:var(--ac)">✅ Conectado com sucesso!</span>';
+    atualizarBotaoAuth();
+    fecharModalAuth();
+    setSyncMsg("✅ Bem-vindo, " + authUser.email + "! Sincronizando dados...", false);
+    sincronizarNuvem(false);
+  } catch(err) {
+    msg.innerHTML = '<span style="color:var(--bad)">❌ Erro de conexão com a internet.</span>';
+  }
+};
+
+// Criar Conta
+$("btnSignupSubmit").onclick = async function(){
+  var email = $("signupEmail").value.trim();
+  var pass = $("signupPass").value;
+  var conf = $("signupPassConf").value;
+  var msg = $("authMsg");
+  if (!email || !pass) {
+    msg.innerHTML = '<span style="color:var(--bad)">Por favor, informe e-mail e senha.</span>';
+    return;
+  }
+  if (pass.length < 6) {
+    msg.innerHTML = '<span style="color:var(--bad)">A senha deve ter no mínimo 6 dígitos.</span>';
+    return;
+  }
+  if (pass !== conf) {
+    msg.innerHTML = '<span style="color:var(--bad)">As senhas digitadas não conferem.</span>';
+    return;
+  }
+  msg.innerHTML = "⏳ Criando sua conta...";
+  try {
+    var res = await fetch(SUPABASE_URL + "/auth/v1/signup", {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ email: email, password: pass })
+    });
+    var data = await res.json();
+    if (!res.ok) {
+      msg.innerHTML = '<span style="color:var(--bad)">❌ ' + esc(data.msg || data.error_description || "Erro ao criar conta.") + '</span>';
+      return;
+    }
+    if (data.session && data.session.user) {
+      authUser = data.session.user;
+      if (data.session.access_token) authUser.access_token = data.session.access_token;
+      localStorage.setItem(KEY_AUTH_USER, JSON.stringify(authUser));
+      atualizarBotaoAuth();
+      fecharModalAuth();
+      sincronizarNuvem(false);
+      alert("✅ Conta criada com sucesso! Seus dados agora estão protegidos na sua conta.");
+    } else {
+      msg.innerHTML = '<span style="color:var(--ac)">✅ Conta criada com sucesso! Você já pode entrar com seu e-mail e senha.</span>';
+      alert("✅ Conta criada com sucesso!\n\nAgora basta clicar na aba 'Entrar' e acessar com seu e-mail e senha.");
+      $("tabAuthLogin").click();
+      $("loginEmail").value = email;
+      $("loginPass").focus();
+    }
+  } catch(err) {
+    msg.innerHTML = '<span style="color:var(--bad)">❌ Erro de conexão com a internet.</span>';
+  }
+};
+
+// Recuperar Senha
+$("btnRecoverSubmit").onclick = async function(){
+  var email = $("recoverEmail").value.trim();
+  var msg = $("authMsg");
+  if (!email) {
+    msg.innerHTML = '<span style="color:var(--bad)">Por favor, informe o seu e-mail cadastrado.</span>';
+    return;
+  }
+  msg.innerHTML = "⏳ Enviando e-mail de recuperação...";
+  try {
+    var res = await fetch(SUPABASE_URL + "/auth/v1/recover", {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ email: email })
+    });
+    if (res.ok) {
+      msg.innerHTML = '<span style="color:var(--ac)">✅ Link de recuperação enviado para seu e-mail!</span>';
+      alert("📧 Link de recuperação enviado com sucesso!\n\nVerifique a caixa de entrada (ou pasta de spam) do e-mail " + email + " para cadastrar sua nova senha.");
+      $("tabAuthLogin").click();
+    } else {
+      var d = await res.json();
+      msg.innerHTML = '<span style="color:var(--bad)">❌ ' + esc(d.msg || d.error_description || "Erro ao solicitar recuperação.") + '</span>';
+    }
+  } catch(err) {
+    msg.innerHTML = '<span style="color:var(--bad)">❌ Erro de conexão com a internet.</span>';
+  }
+};
+
+$("btnAuthSyncNow").onclick = function(){
+  sincronizarNuvem(false);
+};
+
+$("btnAuthLogout").onclick = function(){
+  if (confirm("Deseja realmente sair da sua conta neste aparelho?")) {
+    authUser = null;
+    localStorage.removeItem(KEY_AUTH_USER);
+    atualizarBotaoAuth();
+    fecharModalAuth();
+    setSyncMsg("Você saiu da conta. Os dados salvos continuam disponíveis no aparelho.", false);
+  }
+};
+
+$("btnAuthDeleteAccount").onclick = async function(){
+  if (!confirm("⚠️ ATENÇÃO: Tem certeza que deseja EXCLUIR PERMANENTEMENTE sua conta?\n\nEsta ação apagará sua conta de e-mail e os registros vinculados a ela na nuvem Supabase.")) {
+    return;
+  }
+  var confirmacao = prompt("Para confirmar a exclusão definitiva, digite EXCLUIR em letras maiúsculas:");
+  if (confirmacao !== "EXCLUIR") {
+    alert("Operação cancelada. Sua conta não foi excluída.");
+    return;
+  }
+
+  var token = (authUser && authUser.access_token) ? authUser.access_token : SUPABASE_KEY;
+  try {
+    var headers = {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + token,
+      "Content-Type": "application/json"
+    };
+
+    await fetch(SUPABASE_URL + "/rest/v1/rpc/delete_user_account", {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify({})
+    });
+  } catch(e){}
+
+  authUser = null;
+  localStorage.removeItem(KEY_AUTH_USER);
+  atualizarBotaoAuth();
+  fecharModalAuth();
+  setSyncMsg("Conta excluída permanentemente.", false);
+  alert("✅ Sua conta foi excluída com sucesso.");
+};
+
+var isSyncing = false;
+
+function setSyncMsg(msg, isErr){
+  var el = $("syncStatusBanner");
+  if (!el) return;
+  el.hidden = false;
+  el.style.background = isErr ? "var(--bad-bg)" : "var(--ac-light)";
+  el.style.color = isErr ? "var(--bad)" : "var(--tx)";
+  el.innerHTML = msg;
+  clearTimeout(window._syncMsgTimer);
+  window._syncMsgTimer = setTimeout(function(){ el.hidden = true; }, 5000);
+}
+
+function triggerAutoSync(){
+  clearTimeout(window._syncDebounce);
+  window._syncDebounce = setTimeout(function(){
+    if (navigator.onLine) sincronizarNuvem(true);
+  }, 2500);
+}
+
+function save(){
+  try {
+    localStorage.setItem(KEY, JSON.stringify(animais));
+    triggerAutoSync();
+  } catch(e){}
+}
+
+function saveChuvas(){
+  try {
+    localStorage.setItem(KEY_CHUVAS, JSON.stringify(chuvas));
+    triggerAutoSync();
+  } catch(e){}
+}
+
+function saveMaquinas(){
+  try {
+    localStorage.setItem(KEY_MAQUINAS, JSON.stringify(maquinas));
+    triggerAutoSync();
+  } catch(e){}
+}
+
+function saveLancamentos(){
+  try {
+    localStorage.setItem(KEY_LANCS, JSON.stringify(lancamentos));
+    triggerAutoSync();
+  } catch(e){}
+}
+
+async function sincronizarNuvem(silencioso){
+  if (isSyncing) return;
+  if (!navigator.onLine) {
+    if (!silencioso) alert("📴 Dispositivo sem conexão com a internet no momento.\n\nSeus dados estão 100% salvos no aparelho e serão sincronizados com a nuvem Supabase assim que você tiver conexão.");
+    return;
+  }
+  isSyncing = true;
+  if ($("btnSyncNuvem")) $("btnSyncNuvem").textContent = "⏳ Sincronizando...";
+
+  try {
+    var headers = {
+      "apikey": SUPABASE_KEY,
+      "Authorization": "Bearer " + SUPABASE_KEY,
+      "Content-Type": "application/json"
+    };
+
+    var uid = (authUser && authUser.id) ? authUser.id : null;
+
+    // 1. Enviar animais locais
+    if (animais.length > 0) {
+      var payloadAnimais = animais.map(function(a){
+        return {
+          id: String(a.id),
+          user_id: uid,
+          brinco: String(a.brinco || ""),
+          controle: a.controle || null,
+          apelido: a.apelido || null,
+          peso: a.peso ? parseFloat(a.peso) : null,
+          sexo: a.sexo || null,
+          raca: a.raca || null,
+          nasc: a.nasc || null,
+          mae: a.mae || null,
+          lote: a.lote || null,
+          repro_status: a.repro_status || null,
+          iatf_touro: a.iatf_touro || null,
+          iatf_implante: a.iatf_implante || null,
+          iatf_retirada: a.iatf_retirada || null,
+          iatf_insem: a.iatf_insem || null,
+          status: a.status || "ativo",
+          saida: a.saida || null,
+          motivo: a.motivo || null,
+          obs: a.obs || null,
+          vacinas: Array.isArray(a.vacinas) ? a.vacinas : []
+        };
+      });
+
+      await fetch(SUPABASE_URL + "/rest/v1/animais", {
+        method: "POST",
+        headers: Object.assign({}, headers, { "Prefer": "resolution=merge-duplicates" }),
+        body: JSON.stringify(payloadAnimais)
+      });
+    }
+
+    // Baixar animais da nuvem
+    var urlBuscaAnimais = uid 
+      ? (SUPABASE_URL + "/rest/v1/animais?or=(user_id.eq." + uid + ",user_id.is.null)&select=*")
+      : (SUPABASE_URL + "/rest/v1/animais?select=*");
+
+    var resAnimais = await fetch(urlBuscaAnimais, { headers: headers });
+    if (resAnimais.ok) {
+      var nuvemAnimais = await resAnimais.json();
+      if (Array.isArray(nuvemAnimais) && nuvemAnimais.length > 0) {
+        var mapa = {};
+        nuvemAnimais.forEach(function(a){ mapa[a.id] = a; });
+        animais.forEach(function(a){ mapa[a.id] = a; });
+        animais = Object.values(mapa);
+        try { localStorage.setItem(KEY, JSON.stringify(animais)); } catch(e){}
+      }
+    }
+
+    // 2. Chuvas
+    if (chuvas.length > 0) {
+      var payloadChuvas = chuvas.map(function(c){
+        return {
+          id: String(c.id),
+          user_id: uid,
+          data: String(c.data),
+          mm: parseFloat(c.mm) || 0,
+          local: c.local || null,
+          obs: c.obs || null
+        };
+      });
+      await fetch(SUPABASE_URL + "/rest/v1/chuvas", {
+        method: "POST",
+        headers: Object.assign({}, headers, { "Prefer": "resolution=merge-duplicates" }),
+        body: JSON.stringify(payloadChuvas)
+      });
+    }
+    var urlBuscaChuvas = uid 
+      ? (SUPABASE_URL + "/rest/v1/chuvas?or=(user_id.eq." + uid + ",user_id.is.null)&select=*")
+      : (SUPABASE_URL + "/rest/v1/chuvas?select=*");
+
+    var resChuvas = await fetch(urlBuscaChuvas, { headers: headers });
+    if (resChuvas.ok) {
+      var nuvemChuvas = await resChuvas.json();
+      if (Array.isArray(nuvemChuvas) && nuvemChuvas.length > 0) {
+        var mapaC = {};
+        nuvemChuvas.forEach(function(c){ mapaC[c.id] = c; });
+        chuvas.forEach(function(c){ mapaC[c.id] = c; });
+        chuvas = Object.values(mapaC);
+        try { localStorage.setItem(KEY_CHUVAS, JSON.stringify(chuvas)); } catch(e){}
+      }
+    }
+
+    // 3. Máquinas
+    if (maquinas.length > 0) {
+      var payloadMaq = maquinas.map(function(m){
+        return {
+          id: String(m.id),
+          user_id: uid,
+          nome: String(m.nome),
+          tipo: m.tipo || null,
+          medicao: m.medicao || null,
+          horimetro_atual: m.horimetro_atual ? parseFloat(m.horimetro_atual) : 0,
+          km_atual: m.km_atual ? parseFloat(m.km_atual) : 0,
+          obs: m.obs || null
+        };
+      });
+      await fetch(SUPABASE_URL + "/rest/v1/maquinas", {
+        method: "POST",
+        headers: Object.assign({}, headers, { "Prefer": "resolution=merge-duplicates" }),
+        body: JSON.stringify(payloadMaq)
+      });
+    }
+    var urlBuscaMaq = uid 
+      ? (SUPABASE_URL + "/rest/v1/maquinas?or=(user_id.eq." + uid + ",user_id.is.null)&select=*")
+      : (SUPABASE_URL + "/rest/v1/maquinas?select=*");
+
+    var resMaq = await fetch(urlBuscaMaq, { headers: headers });
+    if (resMaq.ok) {
+      var nuvemMaq = await resMaq.json();
+      if (Array.isArray(nuvemMaq) && nuvemMaq.length > 0) {
+        var mapaM = {};
+        nuvemMaq.forEach(function(m){ mapaM[m.id] = m; });
+        maquinas.forEach(function(m){ mapaM[m.id] = m; });
+        maquinas = Object.values(mapaM);
+        try { localStorage.setItem(KEY_MAQUINAS, JSON.stringify(maquinas)); } catch(e){}
+      }
+    }
+
+    // 4. Lançamentos
+    if (lancamentos.length > 0) {
+      var payloadLancs = lancamentos.map(function(l){
+        return {
+          id: String(l.id),
+          user_id: uid,
+          maq_id: String(l.maq_id),
+          data: String(l.data),
+          operador: l.operador || null,
+          servico: l.servico || null,
+          h_ini: l.h_ini ? parseFloat(l.h_ini) : null,
+          h_fim: l.h_fim ? parseFloat(l.h_fim) : null,
+          horas_trab: l.horas_trab ? parseFloat(l.horas_trab) : null,
+          km_ini: l.km_ini ? parseFloat(l.km_ini) : null,
+          km_fim: l.km_fim ? parseFloat(l.km_fim) : null,
+          km_rodados: l.km_rodados ? parseFloat(l.km_rodados) : null,
+          obs: l.obs || null
+        };
+      });
+      await fetch(SUPABASE_URL + "/rest/v1/lancamentos", {
+        method: "POST",
+        headers: Object.assign({}, headers, { "Prefer": "resolution=merge-duplicates" }),
+        body: JSON.stringify(payloadLancs)
+      });
+    }
+    var urlBuscaLancs = uid 
+      ? (SUPABASE_URL + "/rest/v1/lancamentos?or=(user_id.eq." + uid + ",user_id.is.null)&select=*")
+      : (SUPABASE_URL + "/rest/v1/lancamentos?select=*");
+
+    var resLancs = await fetch(urlBuscaLancs, { headers: headers });
+    if (resLancs.ok) {
+      var nuvemLancs = await resLancs.json();
+      if (Array.isArray(nuvemLancs) && nuvemLancs.length > 0) {
+        var mapaL = {};
+        nuvemLancs.forEach(function(l){ mapaL[l.id] = l; });
+        lancamentos.forEach(function(l){ mapaL[l.id] = l; });
+        lancamentos = Object.values(mapaL);
+        try { localStorage.setItem(KEY_LANCS, JSON.stringify(lancamentos)); } catch(e){}
+      }
+    }
+
+    renderReb();
+    if ($("maq") && !$("maq").hidden) renderMaq();
+    if ($("pluv") && !$("pluv").hidden) renderPluv();
+    if ($("rel") && !$("rel").hidden) renderRel();
+
+    setSyncMsg("☁️ Sincronizado com o Supabase com sucesso!", false);
+    if (!silencioso) alert("✅ Sincronização concluída!\n\nSeus dados estão 100% atualizados no banco de dados Supabase na nuvem.");
+  } catch(err) {
+    console.error("Erro sync:", err);
+    setSyncMsg("⚠️ Modo offline: dados salvos localmente.", true);
+  } finally {
+    isSyncing = false;
+    if ($("btnSyncNuvem")) $("btnSyncNuvem").textContent = "☁️ Nuvem";
+  }
+}
+
+function hoje(){
+  var d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+
+function br(d){
+  return d ? d.split("-").reverse().join("/") : "—";
+}
+
+function idade(n){
+  if (!n) return "";
+  var a = new Date(n), b = new Date();
+  var m = (b.getFullYear() - a.getFullYear()) * 12 + b.getMonth() - a.getMonth();
+  if (b.getDate() < a.getDate()) m--;
+  if (m < 0) return "";
+  return m < 24 ? m + " meses" : Math.floor(m / 12) + " anos";
+}
+
+function show(t){
+  ["reb","cad","maq","pluv","rel"].forEach(function(x){
+    var el = $(x);
+    if (el) el.hidden = (x !== t);
+  });
+  document.querySelectorAll(".tabs button").forEach(function(b){
+    b.classList.toggle("on", b.dataset.t === t);
+  });
+  if (t === "reb") renderReb();
+  if (t === "maq") renderMaq();
+  if (t === "pluv") renderPluv();
+  if (t === "rel") renderRel();
+  window.scrollTo(0, 0);
+}
+
+document.querySelectorAll(".tabs button").forEach(function(b){
+  b.onclick = function(){
+    if (b.dataset.t === "cad") novo();
+    show(b.dataset.t);
+  };
+});
+
+$("btnSobre").onclick = function(){
+  alert("GESTFAZ - Controle de Rebanho & Fazenda\n\n• Funciona 100% offline no celular e computador.\n• Brinco, Nº de Controle, Peso, Lote, Vacinação e IATF.\n• Pluviômetro integrado (chuvas por mês e distribuição anual).\n• Exportação para Excel e PDF editável.\n\nDica: No celular, toque em 'Adicionar à tela de início' para instalar como aplicativo!");
+};
+
+// ==================== REBANHO & DASHBOARD ====================
+function renderReb(){
+  var at = animais.filter(function(a){ return a.status === "ativo"; });
+  $("total").textContent = at.length;
+  
+  var f = at.filter(function(a){ return a.sexo === "Fêmea"; }).length;
+  $("totalFem").textContent = f;
+  $("totalMasc").textContent = at.length - f;
+
+  // Peso Médio
+  var pesos = at.map(function(a){ return parseFloat(a.peso); }).filter(function(p){ return !isNaN(p) && p > 0; });
+  if (pesos.length > 0) {
+    var med = pesos.reduce(function(acc, val){ return acc + val; }, 0) / pesos.length;
+    $("pesoMedio").textContent = med.toFixed(1) + " kg";
+  } else {
+    $("pesoMedio").textContent = "—";
+  }
+
+  // Lotes / Pastos
+  var lt = {};
+  at.forEach(function(a){
+    var l = a.lote ? a.lote.trim() : "Sem pasto";
+    lt[l] = (lt[l] || 0) + 1;
+  });
+
+  var ps = Object.keys(lt).sort(function(a,b){ return a.localeCompare(b, "pt", {numeric:true}); });
+  $("pastos").innerHTML = ps.map(function(l){
+    var nm = /^\d+$/.test(l) ? "Pasto " + l : l;
+    var isSel = (pastoSel === l);
+    return '<div class="card row clickable" data-p="'+esc(l)+'" style="'+(isSel ? 'border:2px solid var(--ac);background:var(--ac-light);' : '')+'">' +
+             '<b>' + esc(nm) + '</b>' +
+             '<span><span class="n" style="font-size:24px">' + lt[l] + '</span> <span class="mut">animais</span></span>' +
+           '</div>';
+  }).join("") || '<div class="mut" style="margin-top:6px">Cadastre animais informando o pasto para vê-los aqui.</div>';
+
+  document.querySelectorAll("#pastos .row").forEach(function(r){
+    r.onclick = function(){
+      pastoSel = (pastoSel === r.dataset.p ? null : r.dataset.p);
+      renderReb();
+    };
+  });
+
+  $("lotes").innerHTML = Object.keys(lt).filter(function(l){ return l !== "Sem pasto"; }).map(function(l){
+    return '<option value="'+esc(l)+'">';
+  }).join("");
+
+  // Atualiza opções do seletor de origem de pasto
+  var selOrigem = $("moverOrigem");
+  if (selOrigem) {
+    var valAnterior = selOrigem.value;
+    selOrigem.innerHTML = ps.map(function(l){
+      var nm = /^\d+$/.test(l) ? "Pasto " + l : l;
+      return '<option value="'+esc(l)+'"' + (l === valAnterior ? ' selected' : '') + '>' + esc(nm) + ' (' + lt[l] + ' animais)</option>';
+    }).join("") || '<option value="">Nenhum pasto cadastrado</option>';
+    atualizarMoverInfo();
+  }
+
+  // Filtros e Busca
+  var q = $("busca").value.trim().toLowerCase();
+  var flStatus = $("filtroStatus").value;
+  var flRepro = $("filtroRepro").value;
+
+  var ls = animais.filter(function(a){
+    if (flStatus !== "todos" && a.status !== flStatus) return false;
+    if (pastoSel && (a.lote || "Sem pasto") !== pastoSel) return false;
+    if (flRepro !== "todos") {
+      var rStatus = (a.repro_status || "").toLowerCase();
+      if (flRepro === "prenhe" && rStatus !== "prenhe") return false;
+      if (flRepro === "inseminada" && rStatus !== "inseminada") return false;
+      if (flRepro === "vazia" && rStatus !== "vazia") return false;
+    }
+    if (!q) return true;
+    
+    var vacinasStr = (a.vacinas || []).map(function(v){ return v.nome; }).join(" ");
+    var camposBusca = [a.brinco, a.controle, a.apelido, a.lote, a.raca, a.peso, a.repro_status, a.iatf_touro, vacinasStr].join(" ").toLowerCase();
+    return camposBusca.indexOf(q) > -1;
+  }).sort(function(a,b){
+    return String(a.brinco).localeCompare(String(b.brinco), "pt", {numeric:true});
+  });
+
+  $("lista").innerHTML = ls.length ? ls.slice(0, 300).map(function(a){
+    var tags = [];
+    if (a.controle) tags.push('<span class="tag">🏷️ Ctrl: <b>' + esc(a.controle) + '</b></span>');
+    if (a.peso) tags.push('<span class="tag">⚖️ <b>' + esc(a.peso) + ' kg</b></span>');
+    if (a.repro_status) tags.push('<span class="tag iatf">🧬 ' + esc(a.repro_status) + '</span>');
+    if (a.vacinas && a.vacinas.length > 0) {
+      var ultVac = a.vacinas[a.vacinas.length - 1];
+      tags.push('<span class="tag vacina">💉 ' + esc(ultVac.nome) + ' (' + br(ultVac.data) + ')</span>');
+    }
+    if (a.mae) {
+      tags.push('<span class="tag" style="background:#e8f5e9;color:#1b5e20;border-color:#a5d6a7">🐮 Mãe: #' + esc(a.mae) + '</span>');
+    }
+    if (a.brinco && a.brinco.indexOf("Bez-") === 0) {
+      tags.push('<span class="tag" style="background:#fff3e0;color:#e65100;border-color:#ffe0b2;font-weight:700">🐮 Bezerro Provisório</span>');
+    }
+    if (a.status !== "ativo") {
+      tags.push('<span class="tag ' + a.status + '">' + a.status.toUpperCase() + ' ' + br(a.saida) + '</span>');
+    }
+
+    var subinfo = [
+      esc(a.sexo),
+      a.raca ? esc(a.raca) : "",
+      a.lote ? "📍 " + esc(a.lote) : "",
+      idade(a.nasc) ? "🎂 " + idade(a.nasc) : ""
+    ].filter(Boolean).join(" · ");
+
+    return '<div class="card clickable" data-id="'+a.id+'">' +
+             '<div class="row">' +
+               '<div>' +
+                 '<b style="font-size:17px">#' + esc(a.brinco) + '</b> ' + (a.apelido ? '<span style="font-weight:600">' + esc(a.apelido) + '</span>' : '') +
+                 '<div class="mut" style="margin-top:2px">' + subinfo + '</div>' +
+                 '<div class="tags">' + tags.join("") + '</div>' +
+               '</div>' +
+               '<div style="font-size:22px;color:var(--mut)">›</div>' +
+             '</div>' +
+           '</div>';
+  }).join("") : '<div class="mut" style="margin-top:16px;text-align:center">Nenhum animal encontrado com os filtros selecionados.</div>';
+
+  document.querySelectorAll("#lista .card").forEach(function(c){
+    c.onclick = function(){ editar(c.dataset.id); };
+  });
+}
+
+$("busca").oninput = renderReb;
+$("filtroStatus").onchange = renderReb;
+$("filtroRepro").onchange = renderReb;
+
+// Atalhos do Rebanho
+$("btnExcelTopo").onclick = function(){ show("rel"); exportarExcel(); };
+$("btnPdfTopo").onclick = function(){ show("rel"); };
+
+// ==================== MOVER PASTO EM MASSA ====================
+function atualizarMoverInfo(){
+  var orig = $("moverOrigem").value;
+  if (!orig) {
+    $("moverInfo").textContent = "Nenhum pasto de origem selecionado.";
+    return;
+  }
+  var at = animais.filter(function(a){ return a.status === "ativo" && (a.lote || "Sem pasto") === orig; });
+  var nm = /^\d+$/.test(orig) ? "Pasto " + orig : orig;
+  $("moverInfo").innerHTML = '📍 <b>' + at.length + ' animais ativos</b> serão transferidos do <u>' + esc(nm) + '</u> para o novo destino.';
+}
+
+$("moverOrigem").onchange = atualizarMoverInfo;
+
+$("btnAbrirMoverPasto").onclick = function(){
+  $("boxMoverPasto").hidden = false;
+  if (pastoSel) {
+    $("moverOrigem").value = pastoSel;
+  }
+  atualizarMoverInfo();
+  $("moverDestino").focus();
+};
+
+$("btnFecharMoverPasto").onclick = function(){
+  $("boxMoverPasto").hidden = true;
+};
+
+$("btnConfirmarMoverPasto").onclick = function(){
+  var orig = $("moverOrigem").value;
+  var dest = $("moverDestino").value.trim();
+
+  if (!orig) {
+    alert("Selecione o pasto de origem.");
+    return;
+  }
+  if (!dest) {
+    alert("Informe o nome ou número do pasto de destino.");
+    $("moverDestino").focus();
+    return;
+  }
+  if (orig === dest) {
+    alert("O pasto de destino não pode ser igual ao pasto de origem.");
+    return;
+  }
+
+  var animaisParaMover = animais.filter(function(a){
+    return a.status === "ativo" && (a.lote || "Sem pasto") === orig;
+  });
+
+  if (animaisParaMover.length === 0) {
+    alert("Não há animais ativos no pasto selecionado.");
+    return;
+  }
+
+  var nmOrig = /^\d+$/.test(orig) ? "Pasto " + orig : orig;
+  var nmDest = /^\d+$/.test(dest) ? "Pasto " + dest : dest;
+
+  var msg = "Confirma transferir todos os " + animaisParaMover.length + " animais do " + nmOrig + " para o " + nmDest + "?";
+  if (!confirm(msg)) return;
+
+  animaisParaMover.forEach(function(a){
+    a.lote = dest;
+  });
+
+  save();
+  $("boxMoverPasto").hidden = true;
+  $("moverDestino").value = "";
+  pastoSel = dest; // já filtra o novo pasto para conferência
+  renderReb();
+  alert("✅ Sucesso! " + animaisParaMover.length + " animais foram transferidos para o " + nmDest + ".");
+};
+
+// ==================== CADASTRO & EDIÇÃO ====================
+var campos = ["brinco","controle","apelido","peso","sexo","raca","nasc","mae","lote","repro_status","iatf_touro","iatf_implante","iatf_retirada","iatf_insem","status","saida","motivo","obs"];
+
+function toggleSaida(){
+  var s = ($("f_status").value !== "ativo");
+  $("saidaBox").hidden = !s;
+  if (s && !$("f_saida").value) $("f_saida").value = hoje();
+}
+$("f_status").onchange = toggleSaida;
+
+function renderVacinasTemp(){
+  if (!vacinasTemp || vacinasTemp.length === 0) {
+    $("vacinasAplicadas").innerHTML = '<div class="mut" style="font-size:13px">Nenhuma vacina registrada para este animal ainda.</div>';
+    return;
+  }
+  $("vacinasAplicadas").innerHTML = vacinasTemp.map(function(v, idx){
+    return '<div class="list-item">' +
+             '<div><b>💉 ' + esc(v.nome) + '</b> <span class="mut">— ' + br(v.data) + '</span></div>' +
+             '<button type="button" class="sm bad" onclick="removerVacina('+idx+')" style="min-height:30px;padding:2px 8px">Remover</button>' +
+           '</div>';
+  }).join("");
+}
+
+window.removerVacina = function(idx){
+  vacinasTemp.splice(idx, 1);
+  renderVacinasTemp();
+};
+
+$("btnAddVac").onclick = function(){
+  var nome = $("f_vac_nome").value.trim();
+  var data = $("f_vac_data").value || hoje();
+  if (!nome) {
+    alert("Informe o nome da vacina ou medicamento.");
+    return;
+  }
+  vacinasTemp.push({ nome: nome, data: data });
+  $("f_vac_nome").value = "";
+  renderVacinasTemp();
+};
+
+function novo(){
+  editId = null;
+  vacinasTemp = [];
+  $("cadTit").textContent = "Novo Animal";
+  if ($("infoBezerroAviso")) {
+    $("infoBezerroAviso").hidden = true;
+    $("infoBezerroAviso").innerHTML = 
+      '<div style="font-weight:700;color:var(--ac)">🐮 Cadastro de Nascimento de Bezerro</div>' +
+      '<div class="mut" style="font-size:13px;margin-top:4px">' +
+        'Bezerros recém-nascidos não precisam de brinco agora. Deixe o campo <b>Número do Brinco</b> vazio e informe o <b>Brinco da Mãe ou Número da Mãe</b>. O sistema gerará a identificação provisória (ex: <b>Bez-104</b>). Ao desmamar, basta editar este animal e colocar o brinco definitivo.' +
+      '</div>';
+  }
+  campos.forEach(function(c){
+    var el = $("f_" + c);
+    if (!el) return;
+    el.value = (c === "sexo" ? "Fêmea" : (c === "status" ? "ativo" : ""));
+  });
+  $("f_vac_nome").value = "";
+  $("f_vac_data").value = hoje();
+  $("excluir").hidden = true;
+  $("msg").textContent = "";
+  toggleSaida();
+  renderVacinasTemp();
+}
+
+function novoNascimento(){
+  novo();
+  $("cadTit").textContent = "🐮 Registrar Nascimento de Bezerro";
+  $("f_nasc").value = hoje();
+  $("f_raca").value = "Nelore";
+  if ($("infoBezerroAviso")) $("infoBezerroAviso").hidden = false;
+  show("cad");
+  setTimeout(function(){
+    var m = $("f_mae");
+    if (m) m.focus();
+  }, 100);
+}
+
+function editar(id){
+  var a = animais.filter(function(x){ return x.id === id; })[0];
+  if (!a) return;
+  editId = id;
+  vacinasTemp = Array.isArray(a.vacinas) ? JSON.parse(JSON.stringify(a.vacinas)) : [];
+  $("cadTit").textContent = "Animal #" + a.brinco + (a.apelido ? " (" + a.apelido + ")" : "");
+  
+  campos.forEach(function(c){
+    var el = $("f_" + c);
+    if (el) el.value = (a[c] != null ? a[c] : "");
+  });
+
+  if (a.brinco && a.brinco.indexOf("Bez-") === 0) {
+    $("infoBezerroAviso").hidden = false;
+    $("infoBezerroAviso").innerHTML = 
+      '<div style="font-weight:700;color:var(--ac)">🐮 Bezerro com Identificação Provisória: #' + esc(a.brinco) + '</div>' +
+      '<div class="mut" style="font-size:13px;margin-top:4px">' +
+        'Quando este bezerro for <b>desmamado</b>, basta substituir o campo <b>Número do Brinco</b> acima pelo novo brinco definitivo. O registro da mãe e todo o histórico continuarão preservados!' +
+      '</div>';
+  } else if ($("infoBezerroAviso")) {
+    $("infoBezerroAviso").hidden = true;
+  }
+
+  $("f_vac_nome").value = "";
+  $("f_vac_data").value = hoje();
+  $("excluir").hidden = false;
+  $("msg").textContent = "";
+  $("saidaBox").hidden = (a.status === "ativo");
+  renderVacinasTemp();
+  show("cad");
+}
+
+$("salvar").onclick = function(){
+  var b = $("f_brinco").value.trim();
+  var mae = $("f_mae").value.trim();
+  var ctrl = $("f_controle").value.trim();
+
+  // Se o brinco está vazio, verifica se é bezerro (com mãe informada) ou tem controle
+  if (!b) {
+    if (mae) {
+      // Auto-gera identificação provisória para o bezerro com base na mãe
+      var base = "Bez-" + mae;
+      var candidata = base;
+      var counter = 2;
+      while (animais.some(function(a){ return a.brinco === candidata && a.id !== editId; })) {
+        candidata = base + "-" + counter;
+        counter++;
+      }
+      b = candidata;
+      $("f_brinco").value = b;
+    } else if (ctrl) {
+      b = "Ctrl-" + ctrl;
+      $("f_brinco").value = b;
+    } else {
+      alert("❌ Por favor, informe o Número do Brinco.\n\nCaso seja um bezerro recém-nascido que ainda não tem brinco, informe ao menos o Brinco da Mãe ou Número da Mãe no campo abaixo.");
+      $("msg").textContent = "❌ Informe o brinco do animal ou o brinco da mãe ou número da mãe se for bezerro.";
+      $("f_mae").focus();
+      return;
+    }
+  }
+
+  // Verifica duplicidade
+  var dup = animais.some(function(a){ return a.brinco === b && a.id !== editId; });
+  if (dup && !confirm("Já existe um animal com o brinco #" + b + ". Salvar mesmo assim?")) {
+    return;
+  }
+
+  var o = {};
+  campos.forEach(function(c){
+    var el = $("f_" + c);
+    o[c] = el ? el.value.trim() : "";
+  });
+
+  if (o.status === "ativo") {
+    o.saida = "";
+    o.motivo = "";
+  }
+
+  o.vacinas = vacinasTemp;
+
+  if (editId) {
+    var a = animais.filter(function(x){ return x.id === editId; })[0];
+    Object.assign(a, o);
+  } else {
+    o.id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    animais.push(o);
+  }
+
+  save();
+  show("reb");
+
+  var msgSucesso = "✅ Animal salvo com sucesso!";
+  if (b.indexOf("Bez-") === 0) {
+    msgSucesso = "✅ Nascimento registrado com sucesso!\n\n🐮 Bezerro salvo com identificação provisória: #" + b + "\n\n💡 Ao desmamar, basta clicar no animal para colocar o brinco definitivo.";
+  }
+  alert(msgSucesso);
+};
+
+$("cancelar").onclick = function(){ show("reb"); };
+
+$("excluir").onclick = function(){
+  if (confirm("Tem certeza que deseja apagar o cadastro deste animal permanentemente?")) {
+    animais = animais.filter(function(a){ return a.id !== editId; });
+    save();
+    show("reb");
+  }
+};
+
+// ==================== EXPORTAÇÃO PARA EXCEL (.CSV) ====================
+function exportarExcel(){
+  if (animais.length === 0) {
+    alert("Nenhum animal cadastrado para exportar.");
+    return;
+  }
+
+  var cabecalho = [
+    "Brinco",
+    "Nº Controle",
+    "Apelido",
+    "Sexo",
+    "Raça",
+    "Nascimento",
+    "Idade",
+    "Peso (kg)",
+    "Pasto/Lote",
+    "Brinco da Mãe ou Número da Mãe",
+    "Situação",
+    "Data Saída",
+    "Motivo Baixa",
+    "Status Reprodutivo",
+    "Touro/Sêmen",
+    "IATF D0 (Implante)",
+    "IATF Retirada",
+    "IATF Inseminação",
+    "Última Vacina",
+    "Data Vacina",
+    "Histórico de Vacinas",
+    "Observações"
+  ];
+
+  var linhas = animais.map(function(a){
+    var ultVacNome = "", ultVacData = "", histVac = "";
+    if (a.vacinas && a.vacinas.length > 0) {
+      var ult = a.vacinas[a.vacinas.length - 1];
+      ultVacNome = ult.nome;
+      ultVacData = br(ult.data);
+      histVac = a.vacinas.map(function(v){ return v.nome + " (" + br(v.data) + ")"; }).join(" | ");
+    }
+
+    var valores = [
+      a.brinco || "",
+      a.controle || "",
+      a.apelido || "",
+      a.sexo || "",
+      a.raca || "",
+      br(a.nasc),
+      idade(a.nasc),
+      a.peso || "",
+      a.lote || "",
+      a.mae || "",
+      a.status || "",
+      br(a.saida),
+      a.motivo || "",
+      a.repro_status || "",
+      a.iatf_touro || "",
+      br(a.iatf_implante),
+      br(a.iatf_retirada),
+      br(a.iatf_insem),
+      ultVacNome,
+      ultVacData,
+      histVac,
+      (a.obs || "").replace(/[\r\n]+/g, " ")
+    ];
+
+    return valores.map(function(v){
+      var str = String(v).replace(/"/g, '""');
+      return '"' + str + '"';
+    }).join(";");
+  });
+
+  // UTF-8 BOM (\uFEFF) para abrir com acentuação correta no Excel brasileiro
+  var csvContent = "\uFEFF" + cabecalho.join(";") + "\r\n" + linhas.join("\r\n");
+  var blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  var url = URL.createObjectURL(blob);
+  var link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", "GESTFAZ_Rebanho_" + hoje() + ".csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+function exportarNascimentosExcel(){
+  var m = $("mes").value || hoje().slice(0, 7);
+  var ini = m + "-01";
+  var y = +m.slice(0, 4);
+  var mo = +m.slice(5);
+  var fim = m + "-" + String(new Date(y, mo, 0).getDate()).padStart(2, "0");
+
+  var nasc = animais.filter(function(a){
+    return a.nasc && a.nasc >= ini && a.nasc <= fim;
+  }).sort(function(a,b){
+    return String(a.nasc).localeCompare(String(b.nasc));
+  });
+
+  if (nasc.length === 0) {
+    alert("Nenhum nascimento registrado no mês selecionado (" + m + ").");
+    return;
+  }
+
+  var cabecalho = ["Brinco ou Nº da Mãe", "Sexo", "Data de Nascimento", "Raça", "Pasto", "Peso (kg)", "Observações"];
+  var linhas = nasc.map(function(a){
+    var valores = [
+      a.mae || a.brinco || "Não informada",
+      a.sexo || "",
+      br(a.nasc),
+      a.raca || "Nelore",
+      a.lote || "",
+      a.peso || "",
+      (a.obs || "").replace(/[\r\n]+/g, " ")
+    ];
+    return valores.map(function(v){ return '"' + String(v).replace(/"/g, '""') + '"'; }).join(";");
+  });
+
+  var csvContent = "\uFEFF" + cabecalho.join(";") + "\r\n" + linhas.join("\r\n");
+  var blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  var url = URL.createObjectURL(blob);
+  var link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", "GESTFAZ_Nascimentos_" + m + ".csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+var tipoRelatorioAtual = "geral";
+
+$("btnTipoRelGeral").onclick = function(){
+  tipoRelatorioAtual = "geral";
+  $("btnTipoRelGeral").classList.add("on");
+  $("btnTipoRelNasc").classList.remove("on");
+  if ($("boxAcaoNascRel")) $("boxAcaoNascRel").hidden = true;
+  $("relTituloSec").textContent = "Balanço Mensal de Rebanho";
+  $("txtExcelTit").textContent = "📊 Exportar Planilha (.CSV)";
+  $("txtExcelSub").textContent = "Gera a planilha completa de todo o rebanho com peso, pasto, vacinas e inseminação.";
+  renderRel();
+};
+
+$("btnTipoRelNasc").onclick = function(){
+  tipoRelatorioAtual = "nascimentos";
+  $("btnTipoRelNasc").classList.add("on");
+  $("btnTipoRelGeral").classList.remove("on");
+  if ($("boxAcaoNascRel")) $("boxAcaoNascRel").hidden = false;
+  $("relTituloSec").textContent = "🐮 Relatório de Nascimentos";
+  $("txtExcelTit").textContent = "📊 Exportar Nascimentos (.CSV)";
+  $("txtExcelSub").textContent = "Gera a relação de bezerros nascidos com número da mãe, sexo, data e raça.";
+  renderRel();
+};
+
+if ($("btnNovoNascReb")) $("btnNovoNascReb").onclick = novoNascimento;
+if ($("btnNovoNascRel")) $("btnNovoNascRel").onclick = novoNascimento;
+
+$("btnExportarExcel").onclick = function(){
+  if (tipoRelatorioAtual === "nascimentos") {
+    exportarNascimentosExcel();
+  } else {
+    exportarExcel();
+  }
+};
+
+// ==================== RELATÓRIO MENSAL & PDF EDITÁVEL ====================
+function relData(){
+  var m = $("mes").value || hoje().slice(0, 7);
+  var ini = m + "-01";
+  var y = +m.slice(0, 4);
+  var mo = +m.slice(5);
+  var fim = m + "-" + String(new Date(y, mo, 0).getDate()).padStart(2, "0");
+
+  var inicial = animais.filter(function(a){
+    return (!a.nasc || a.nasc < ini) && (a.status === "ativo" || (a.saida && a.saida >= ini));
+  }).length;
+
+  var nasc = animais.filter(function(a){ return a.nasc && a.nasc >= ini && a.nasc <= fim; });
+  var mortos = animais.filter(function(a){ return a.status === "morto" && a.saida >= ini && a.saida <= fim; });
+  var vend = animais.filter(function(a){ return a.status === "vendido" && a.saida >= ini && a.saida <= fim; });
+  
+  var finalQtd = animais.filter(function(a){
+    return (!a.nasc || a.nasc <= fim) && (a.status === "ativo" || (a.saida && a.saida > fim));
+  }).length;
+
+  // Chuvas no mês selecionado (ordenadas por data)
+  var chuvasMes = chuvas.filter(function(c){
+    return c.data && c.data.slice(0, 7) === m && (parseFloat(c.mm) > 0);
+  }).sort(function(a,b){
+    return String(a.data).localeCompare(String(b.data));
+  });
+  var totalChuvaMes = chuvasMes.reduce(function(acc, val){ return acc + (parseFloat(val.mm) || 0); }, 0);
+  var diasChuvaMes = chuvasMes.length;
+
+  // Dados consolidados por máquina para o relatório mensal
+  var dadosMaq = maquinas.map(function(mObj){
+    var lancsNoMes = lancamentos.filter(function(l){
+      return l.maq_id === mObj.id && l.data >= ini && l.data <= fim;
+    });
+
+    var usouArr = [];
+    if (mObj.medicao === "Horímetro" || mObj.medicao === "Ambos") {
+      var usouH = lancsNoMes.reduce(function(acc, val){ return acc + (parseFloat(val.horas_trab) || 0); }, 0);
+      usouArr.push(usouH.toFixed(1) + " h");
+    }
+
+    if (mObj.medicao === "Quilometragem" || mObj.medicao === "Ambos") {
+      var usouKm = lancsNoMes.reduce(function(acc, val){ return acc + (parseFloat(val.km_rodado) || 0); }, 0);
+      usouArr.push(Math.round(usouKm).toLocaleString("pt-BR") + " km");
+    }
+
+    return {
+      nome: mObj.nome,
+      tipo: mObj.tipo,
+      totalTrabalhado: usouArr.join(" · ") || "0,0 h"
+    };
+  });
+
+  return {
+    m:m, ini:ini, fim:fim,
+    inicial:inicial, nasc:nasc, mortos:mortos, vend:vend, final:finalQtd,
+    chuvasMes:chuvasMes, totalChuvaMes:totalChuvaMes, diasChuvaMes:diasChuvaMes,
+    dadosMaq:dadosMaq
+  };
+}
+
+function tabelaRel(titulo, arr, fnData){
+  if (!arr.length) return "";
+  var colTit = (titulo === "Nascimentos") ? "Mãe" : "Animal";
+  return '<h2>' + titulo + ' (' + arr.length + ')</h2>' +
+         '<table>' +
+           '<thead><tr><th>' + colTit + '</th><th>Data</th><th>Detalhes</th></tr></thead>' +
+           '<tbody>' +
+             arr.map(function(a){
+               var idText = (titulo === "Nascimentos")
+                 ? ('<b>Mãe: #' + esc(a.mae || a.brinco) + '</b>')
+                 : ('<b>#' + esc(a.brinco) + '</b> ' + (a.controle ? '<span class="tag" style="padding:1px 5px">Ctrl: ' + esc(a.controle) + '</span> ' : '') + esc(a.apelido));
+               return '<tr>' +
+                        '<td>' + idText + '</td>' +
+                        '<td>' + br(fnData(a)) + '</td>' +
+                        '<td class="mut">' + esc(a.motivo || a.sexo || a.raca) + '</td>' +
+                      '</tr>';
+             }).join("") +
+           '</tbody>' +
+         '</table>';
+}
+
+function tabelaChuvasRel(arr, totalMm){
+  if (!arr || !arr.length) return "";
+  return '<h2>🌧️ Registro Diário de Chuvas</h2>' +
+         '<table>' +
+           '<thead><tr><th>Data da Chuva</th><th>Quantidade (mm)</th></tr></thead>' +
+           '<tbody>' +
+             arr.map(function(c){
+               return '<tr>' +
+                        '<td><b>📅 ' + br(c.data) + '</b></td>' +
+                        '<td><span class="tag" style="font-weight:700;color:var(--blue)">' + parseFloat(c.mm).toFixed(1) + ' mm</span></td>' +
+                      '</tr>';
+             }).join("") +
+             '<tr style="font-weight:700;background:var(--ac-light)">' +
+               '<td><b>QUANTIDADE TOTAL DE CHUVA NO MÊS</b></td>' +
+               '<td><span style="font-weight:800;color:var(--blue);font-size:16px">' + (parseFloat(totalMm) || 0).toFixed(1) + ' mm</span></td>' +
+             '</tr>' +
+           '</tbody>' +
+         '</table>';
+}
+
+function tabelaMaqRel(arr){
+  if (!arr || !arr.length) return "";
+  return '<h2>🚜 Máquinas e Veículos</h2>' +
+         '<table>' +
+           '<thead><tr><th>Veículo / Equipamento</th><th>Total Trabalhado no Mês</th></tr></thead>' +
+           '<tbody>' +
+             arr.map(function(m){
+               return '<tr>' +
+                        '<td><b>' + iconeMaq(m.tipo) + ' ' + esc(m.nome) + '</b></td>' +
+                        '<td><span class="tag" style="font-weight:700;color:var(--ac)">' + esc(m.totalTrabalhado) + '</span></td>' +
+                      '</tr>';
+             }).join("") +
+           '</tbody>' +
+         '</table>';
+}
+
+function gerarTextoRelatorioPadrao(){
+  var r = relData();
+  var p = r.m.split("-");
+  var fazenda = ($("fazendaNome").value || "GESTFAZ - GESTÃO DA FAZENDA").toUpperCase();
+
+  var formatLista = function(tit, arr, fnDt){
+    if (!arr.length) return "";
+    return "\n" + tit.toUpperCase() + " (" + arr.length + "):\n" +
+      arr.map(function(a){
+        if (tit === "Nascimentos") {
+          return " • Mãe: #" + (a.mae || a.brinco) + " — Sexo: " + (a.sexo || "Não informado") + " — Data Nasc: " + br(fnDt(a)) + (a.raca ? " — Raça: " + a.raca : "");
+        }
+        return " • #" + a.brinco + (a.controle ? " [Ctrl: " + a.controle + "]" : "") + (a.apelido ? " (" + a.apelido + ")" : "") + " — " + br(fnDt(a)) + (a.motivo ? " [Motivo: " + a.motivo + "]" : "");
+      }).join("\n");
+  };
+
+  var textoChuvas = "";
+  if (r.chuvasMes && r.chuvasMes.length > 0) {
+    textoChuvas = "\n\n===========================================\n" +
+                  "2. PLUVIÔMETRO / CHUVAS:\n" +
+                  " • Quantidade Total de Chuva no Mês: " + r.totalChuvaMes.toFixed(1) + " mm\n" +
+                  "-------------------------------------------\n" +
+                  "CHUVAS NO PERÍODO:\n" +
+                  r.chuvasMes.map(function(c){
+                    return " • " + br(c.data) + " — " + parseFloat(c.mm).toFixed(1) + " mm";
+                  }).join("\n") +
+                  "\n • TOTAL ACUMULADO: " + r.totalChuvaMes.toFixed(1) + " mm";
+  } else {
+    textoChuvas = "\n\n===========================================\n" +
+                  "2. PLUVIÔMETRO / CHUVAS:\n" +
+                  " • Nenhuma chuva registrada neste mês (Total: 0.0 mm).";
+  }
+
+  var textoMaq = "";
+  if (r.dadosMaq && r.dadosMaq.length > 0) {
+    textoMaq = "\n\n===========================================\n" +
+               "3. MÁQUINAS E VEÍCULOS (TOTAL TRABALHADO NO MÊS):\n" +
+               r.dadosMaq.map(function(m){
+                 return " • " + m.nome + ": " + m.totalTrabalhado;
+               }).join("\n");
+  }
+
+  return "===========================================\n" +
+         fazenda + "\n" +
+         "RELATÓRIO MENSAL INTEGRADO — " + p[1] + "/" + p[0] + "\n" +
+         "Data de Emissão: " + br(hoje()) + "\n" +
+         "===========================================\n\n" +
+         "1. BALANÇO GERAL DO REBANHO:\n" +
+         " • Animais no início do mês:  " + r.inicial + "\n" +
+         " • Nascimentos no período:   +" + r.nasc.length + "\n" +
+         " • Mortes no período:         -" + r.mortos.length + "\n" +
+         " • Vendas no período:         -" + r.vend.length + "\n" +
+         "-------------------------------------------\n" +
+         " TOTAL ATUAL NO FIM DO MÊS:    " + r.final + " animais\n" +
+         "===========================================" +
+         formatLista("Mortes", r.mortos, function(a){ return a.saida; }) +
+         formatLista("Vendas", r.vend, function(a){ return a.saida; }) +
+         textoChuvas +
+         textoMaq +
+         "\n\n===========================================\n" +
+         "Observações Gerais:\n(Digite aqui anotações extras do gerente, veterinário ou proprietário...)";
+}
+
+function tabelaNascimentosExclusiva(nasc){
+  if (!nasc.length) {
+    return '<div class="mut" style="text-align:center;padding:24px">Nenhum bezerro com nascimento registrado no mês selecionado.</div>';
+  }
+  return '<h2>Relação Detalhada de Nascimentos (' + nasc.length + ' bezerros)</h2>' +
+         '<table>' +
+           '<thead>' +
+             '<tr>' +
+               '<th>Brinco ou Nº da Mãe</th>' +
+               '<th>Sexo</th>' +
+               '<th>Data de Nascimento</th>' +
+               '<th>Raça</th>' +
+             '</tr>' +
+           '</thead>' +
+           '<tbody>' +
+             nasc.map(function(a){
+               var sexoTag = (a.sexo === "Fêmea") 
+                 ? '<span class="tag" style="color:var(--bad);border-color:var(--bad);background:var(--bad-bg);font-weight:700">Fêmea</span>' 
+                 : '<span class="tag" style="color:var(--blue);border-color:var(--blue);background:var(--blue-bg);font-weight:700">Macho</span>';
+               var maeTxt = a.mae ? ('<b>#' + esc(a.mae) + '</b>') : ('<b>#' + esc(a.brinco) + '</b>');
+               return '<tr>' +
+                        '<td>' + maeTxt + '</td>' +
+                        '<td>' + sexoTag + '</td>' +
+                        '<td>📅 ' + br(a.nasc) + '</td>' +
+                        '<td>' + esc(a.raca || "Nelore") + '</td>' +
+                      '</tr>';
+             }).join("") +
+           '</tbody>' +
+         '</table>';
+}
+
+function gerarTextoNascimentosPadrao(){
+  var r = relData();
+  var p = r.m.split("-");
+  var fazenda = ($("fazendaNome").value || "GESTFAZ - GESTÃO DA FAZENDA").toUpperCase();
+  var nasc = r.nasc;
+  var fem = nasc.filter(function(a){ return a.sexo === "Fêmea"; }).length;
+  var masc = nasc.length - fem;
+
+  var listaTxt = nasc.length ? nasc.map(function(a){
+    return " • Mãe: #" + (a.mae || a.brinco || "S/N") + " — Sexo: " + a.sexo + " — Data Nasc: " + br(a.nasc) + " — Raça: " + (a.raca || "Nelore");
+  }).join("\n") : " • Nenhum nascimento registrado no período.";
+
+  return "===========================================\n" +
+         fazenda + "\n" +
+         "RELATÓRIO DE NASCIMENTOS — " + p[1] + "/" + p[0] + "\n" +
+         "Data de Emissão: " + br(hoje()) + "\n" +
+         "===========================================\n\n" +
+         "RESUMO DE NASCIMENTOS:\n" +
+         " • Total de bezerros nascidos: " + nasc.length + "\n" +
+         " • Fêmeas:                     " + fem + "\n" +
+         " • Machos:                     " + masc + "\n" +
+         "-------------------------------------------\n" +
+         "RELAÇÃO DE BEZERROS NASCIDOS:\n" +
+         listaTxt + "\n" +
+         "===========================================\n" +
+         "Observações da Maternidade:\n(Digite aqui anotações extras do retireiro ou vaqueiro...)";
+}
+
+function renderRel(){
+  if (!$("mes").value) $("mes").value = hoje().slice(0, 7);
+  var r = relData();
+
+  if (tipoRelatorioAtual === "nascimentos") {
+    var nasc = r.nasc;
+    var fem = nasc.filter(function(a){ return a.sexo === "Fêmea"; }).length;
+    var masc = nasc.length - fem;
+
+    $("relOut").innerHTML = 
+      '<div class="grid" style="margin-top:10px">' +
+        '<div class="card"><div class="mut">Total de Nascimentos</div><div class="n">' + nasc.length + '</div></div>' +
+        '<div class="card"><div class="mut">Fêmeas Nascidas</div><div class="n" style="color:var(--bad)">' + fem + '</div></div>' +
+        '<div class="card"><div class="mut">Machos Nascidos</div><div class="n" style="color:var(--blue)">' + masc + '</div></div>' +
+      '</div>' +
+      tabelaNascimentosExclusiva(nasc);
+
+    $("pdfEditorArea").value = gerarTextoNascimentosPadrao();
+    return;
+  }
+
+  // Relatório Geral
+  $("relOut").innerHTML = 
+    '<div class="grid" style="margin-top:10px">' +
+      '<div class="card"><div class="mut">Início do Mês</div><div class="n">' + r.inicial + '</div></div>' +
+      '<div class="card"><div class="mut">Nascimentos</div><div class="n">+' + r.nasc.length + '</div></div>' +
+      '<div class="card"><div class="mut">Mortes</div><div class="n">−' + r.mortos.length + '</div></div>' +
+      '<div class="card"><div class="mut">Vendas</div><div class="n">−' + r.vend.length + '</div></div>' +
+      '<div class="card"><div class="mut">Fim do Mês</div><div class="n">' + r.final + '</div></div>' +
+      '<div class="card"><div class="mut">🌧️ Chuva no Mês</div><div class="n" style="color:var(--blue);font-size:24px">' + r.totalChuvaMes.toFixed(1) + ' mm</div></div>' +
+    '</div>' +
+    tabelaRel("Mortes", r.mortos, function(a){ return a.saida; }) +
+    tabelaRel("Vendas", r.vend, function(a){ return a.saida; }) +
+    tabelaChuvasRel(r.chuvasMes, r.totalChuvaMes) +
+    tabelaMaqRel(r.dadosMaq);
+
+  $("pdfEditorArea").value = gerarTextoRelatorioPadrao();
+}
+
+$("mes").onchange = renderRel;
+$("fazendaNome").oninput = function(){
+  $("pdfEditorArea").value = (tipoRelatorioAtual === "nascimentos") ? gerarTextoNascimentosPadrao() : gerarTextoRelatorioPadrao();
+};
+$("btnAtualizarTexto").onclick = function(){
+  $("pdfEditorArea").value = (tipoRelatorioAtual === "nascimentos") ? gerarTextoNascimentosPadrao() : gerarTextoRelatorioPadrao();
+};
+
+// IMPRIMIR / SALVAR COMO PDF
+$("btnImprimirPdf").onclick = function(){
+  var textoEditado = $("pdfEditorArea").value;
+  var janela = window.open("", "_blank");
+  if (!janela) {
+    alert("Por favor, permita a abertura de janelas pop-up para gerar o PDF.");
+    return;
+  }
+  
+  janela.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>Relatório GESTFAZ</title>' +
+    '<style>' +
+    'body{font-family:ui-monospace,"Courier New",monospace;padding:24px;color:#111;white-space:pre-wrap;line-height:1.45;font-size:14px;}' +
+    '@media print{body{padding:0;}}' +
+    '</style></head><body>' +
+    esc(textoEditado) +
+    '<script>window.onload=function(){window.print();}<\/script>' +
+    '</body></html>');
+  janela.document.close();
+};
+
+// COPIAR PARA WHATSAPP
+$("relCopy").onclick = function(){
+  var texto = $("pdfEditorArea").value;
+  if (!navigator.clipboard) {
+    alert("Copie o texto diretamente da caixa acima.");
+    return;
+  }
+  navigator.clipboard.writeText(texto).then(function(){
+    alert("✅ Resumo copiado com sucesso! Agora basta abrir o WhatsApp e colar.");
+  }, function(){
+    alert("Não foi possível copiar automaticamente. Selecione e copie o texto da caixa acima.");
+  });
+};
+
+// ==================== BACKUP & RESTAURAÇÃO ====================
+if ($("bkCopy")) {
+  $("bkCopy").onclick = function(){
+    var t = $("bkTxt");
+    t.hidden = false;
+    var backupObj = {
+      gestfaz_backup: true,
+      data: hoje(),
+      animais: animais,
+      chuvas: chuvas,
+      maquinas: maquinas,
+      lancamentos: lancamentos
+    };
+    t.value = JSON.stringify(backupObj, null, 2);
+    t.select();
+    try {
+      navigator.clipboard.writeText(t.value).then(function(){
+        alert("✅ Backup copiado! (Inclui Rebanho, Chuvas e Máquinas). Guarde este texto nas notas ou no WhatsApp.");
+      });
+    } catch(e){}
+  };
+}
+
+if ($("bkDownload")) {
+  $("bkDownload").onclick = function(){
+    var backupObj = {
+      gestfaz_backup: true,
+      data: hoje(),
+      animais: animais,
+      chuvas: chuvas,
+      maquinas: maquinas,
+      lancamentos: lancamentos
+    };
+    var str = JSON.stringify(backupObj, null, 2);
+    var blob = new Blob([str], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "backup_gestfaz_" + hoje() + ".json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+}
+
+if ($("bkRest")) {
+  $("bkRest").onclick = function(){
+    var t = $("bkTxt");
+    if (t.hidden || !t.value.trim()) {
+      t.hidden = false;
+      t.value = "";
+      t.focus();
+      alert("Cole o código do backup na caixa de texto abaixo e clique em Restaurar Backup novamente.");
+      return;
+    }
+    try {
+      var d = JSON.parse(t.value);
+      var qtdAnimais = 0, qtdChuvas = 0, qtdMaq = 0;
+      if (d && d.gestfaz_backup) {
+        animais = Array.isArray(d.animais) ? d.animais : [];
+        chuvas = Array.isArray(d.chuvas) ? d.chuvas : [];
+        maquinas = Array.isArray(d.maquinas) ? d.maquinas : [];
+        lancamentos = Array.isArray(d.lancamentos) ? d.lancamentos : [];
+        qtdAnimais = animais.length;
+        qtdChuvas = chuvas.length;
+        qtdMaq = maquinas.length;
+      } else if (Array.isArray(d)) {
+        animais = d;
+        qtdAnimais = d.length;
+      } else {
+        throw 0;
+      }
+
+      if (confirm("Deseja restaurar os dados do backup (" + qtdAnimais + " animais, " + qtdChuvas + " chuvas e " + qtdMaq + " máquinas)?")) {
+        save();
+        saveChuvas();
+        saveMaquinas();
+        saveLancamentos();
+        t.hidden = true;
+        renderReb();
+        if (!$("maq").hidden) renderMaq();
+        if (!$("pluv").hidden) renderPluv();
+        alert("✅ Dados restaurados com sucesso!");
+      }
+    } catch(e) {
+      alert("❌ Código de backup inválido.");
+    }
+  };
+}
+
+// ==================== PLUVIÔMETRO / CHUVAS ====================
+var MESES_NOMES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+var MESES_ABR = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+
+function renderPluv(){
+  var hj = hoje();
+  var anoAtual = parseInt(hj.slice(0, 4), 10);
+  var mesAtual = hj.slice(0, 7);
+  var numMes = parseInt(hj.slice(5, 7), 10) - 1;
+
+  $("pluvMesNome").textContent = MESES_NOMES[numMes] + "/" + anoAtual;
+  $("pluvAnoNome").textContent = String(anoAtual);
+
+  if (!$("p_data").value) $("p_data").value = hj;
+
+  // Popula select de anos
+  var anosDisponiveis = [anoAtual];
+  chuvas.forEach(function(ch){
+    if (ch.data) {
+      var a = parseInt(ch.data.slice(0, 4), 10);
+      if (!isNaN(a) && anosDisponiveis.indexOf(a) === -1) {
+        anosDisponiveis.push(a);
+      }
+    }
+  });
+  anosDisponiveis.sort(function(a, b){ return b - a; });
+
+  var selAno = $("pluvFiltroAno");
+  var anoSelecionado = parseInt(selAno.value, 10) || anoAtual;
+  selAno.innerHTML = anosDisponiveis.map(function(a){
+    return '<option value="' + a + '"' + (a === anoSelecionado ? ' selected' : '') + '>Ano ' + a + '</option>';
+  }).join("");
+
+  // Chuva no mês atual
+  var chuvasMes = chuvas.filter(function(c){ return c.data && c.data.slice(0, 7) === mesAtual && (parseFloat(c.mm) > 0); });
+  var totalMes = chuvasMes.reduce(function(acc, val){ return acc + (parseFloat(val.mm) || 0); }, 0);
+  $("pluvTotalMes").textContent = totalMes.toFixed(1) + " mm";
+  $("pluvDiasMes").textContent = chuvasMes.length + (chuvasMes.length === 1 ? " dia" : " dias");
+
+  // Chuva no ano selecionado
+  var chuvasAno = chuvas.filter(function(c){ return c.data && c.data.slice(0, 4) === String(anoSelecionado); });
+  var totalAno = chuvasAno.reduce(function(acc, val){ return acc + (parseFloat(val.mm) || 0); }, 0);
+  $("pluvTotalAno").textContent = totalAno.toFixed(1) + " mm";
+
+  // Gráfico mensal de barras
+  var totaisPorMes = [0,0,0,0,0,0,0,0,0,0,0,0];
+  chuvasAno.forEach(function(ch){
+    var m = parseInt(ch.data.slice(5, 7), 10) - 1;
+    if (m >= 0 && m < 12) {
+      totaisPorMes[m] += (parseFloat(ch.mm) || 0);
+    }
+  });
+  var maxMes = Math.max.apply(null, totaisPorMes);
+  if (maxMes === 0) maxMes = 100;
+
+  $("pluvGraficoBarras").innerHTML = totaisPorMes.map(function(val, idx){
+    var pct = Math.round((val / maxMes) * 100);
+    var isCurrentMonth = (anoSelecionado === anoAtual && idx === numMes);
+    var barColor = isCurrentMonth ? 'var(--ac)' : 'var(--blue)';
+    return '<div style="display:flex;align-items:center;gap:10px;margin:7px 0">' +
+             '<div style="width:36px;font-size:13px;font-weight:600;' + (isCurrentMonth ? 'color:var(--ac);font-weight:800' : '') + '">' + MESES_ABR[idx] + '</div>' +
+             '<div style="flex:1;background:var(--bg);height:22px;border-radius:6px;overflow:hidden;border:1px solid var(--bd)">' +
+               '<div style="width:' + pct + '%;background:' + barColor + ';height:100%;border-radius:5px;transition:width 0.3s ease"></div>' +
+             '</div>' +
+             '<div style="width:72px;text-align:right;font-size:13px;font-weight:700">' + val.toFixed(1) + ' mm</div>' +
+           '</div>';
+  }).join("");
+
+  // Histórico de medições
+  var listaChuvas = chuvas.slice().sort(function(a, b){
+    return String(b.data).localeCompare(String(a.data));
+  });
+
+  if (listaChuvas.length === 0) {
+    $("pluvHistorico").innerHTML = '<div class="mut" style="text-align:center;padding:16px">Nenhuma medição de chuva registrada ainda. Preencha o formulário acima para registrar a primeira chuva!</div>';
+  } else {
+    $("pluvHistorico").innerHTML = listaChuvas.slice(0, 100).map(function(ch){
+      return '<div class="card">' +
+               '<div class="row">' +
+                 '<div>' +
+                   '<b style="font-size:18px;color:var(--blue)">🌧️ ' + parseFloat(ch.mm).toFixed(1) + ' mm</b>' +
+                   '<span class="mut" style="margin-left:8px">📅 ' + br(ch.data) + '</span>' +
+                   (ch.local ? '<div class="tag" style="margin-top:4px">📍 ' + esc(ch.local) + '</div>' : '') +
+                   (ch.obs ? '<div class="mut" style="font-size:13px;margin-top:4px">💬 ' + esc(ch.obs) + '</div>' : '') +
+                 '</div>' +
+                 '<button class="sm bad" onclick="excluirChuva(\'' + ch.id + '\')" title="Excluir medição">Excluir</button>' +
+               '</div>' +
+             '</div>';
+    }).join("");
+  }
+}
+
+$("pluvFiltroAno").onchange = function(){
+  renderPluv();
+};
+
+$("btnSalvarChuva").onclick = function(){
+  var data = $("p_data").value;
+  var mm = parseFloat($("p_mm").value);
+  var local = $("p_local").value.trim();
+  var obs = $("p_obs").value.trim();
+
+  if (!data) {
+    alert("Informe a data da medição.");
+    return;
+  }
+  if (isNaN(mm) || mm < 0) {
+    alert("Informe um volume de chuva válido em mm.");
+    $("p_mm").focus();
+    return;
+  }
+
+  var novoRegistro = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    data: data,
+    mm: mm,
+    local: local,
+    obs: obs
+  };
+
+  chuvas.push(novoRegistro);
+  saveChuvas();
+
+  $("p_mm").value = "";
+  $("p_obs").value = "";
+  $("p_msg").textContent = "✅ Medição de " + mm + " mm salva com sucesso!";
+  setTimeout(function(){ $("p_msg").textContent = ""; }, 3000);
+
+  renderPluv();
+};
+
+window.excluirChuva = function(id){
+  if (confirm("Deseja apagar este registro de chuva?")) {
+    chuvas = chuvas.filter(function(c){ return c.id !== id; });
+    saveChuvas();
+    renderPluv();
+  }
+};
+
+function exportarChuvasExcel(){
+  if (chuvas.length === 0) {
+    alert("Nenhum registro de chuva para exportar.");
+    return;
+  }
+  var cabecalho = ["Data", "Chuva (mm)", "Local / Pluviômetro", "Observações"];
+  var linhas = chuvas.slice().sort(function(a,b){ return String(b.data).localeCompare(String(a.data)); }).map(function(c){
+    var valores = [br(c.data), String(c.mm).replace(".", ","), c.local || "", (c.obs || "").replace(/[\r\n]+/g, " ")];
+    return valores.map(function(v){ return '"' + String(v).replace(/"/g, '""') + '"'; }).join(";");
+  });
+  var csvContent = "\uFEFF" + cabecalho.join(";") + "\r\n" + linhas.join("\r\n");
+  var blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  var url = URL.createObjectURL(blob);
+  var link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", "GESTFAZ_Chuvas_" + hoje() + ".csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+$("btnExportarChuvas").onclick = exportarChuvasExcel;
+
+// ==================== MÁQUINAS / HORÍMETRO / QUILOMETRAGEM ====================
+function iconeMaq(tipo){
+  switch(tipo){
+    case "Trator": return "🚜";
+    case "Caminhonete": return "🛻";
+    case "Caminhão": return "🚛";
+    case "Colheitadeira": return "🌾";
+    case "Pá Carregadeira": return "🚜";
+    case "Moto": return "🏍️";
+    case "Gerador / Bomba": return "⚙️";
+    default: return "🔧";
+  }
+}
+
+function renderMaq(){
+  $("totalMaq").textContent = maquinas.length;
+
+  var hj = hoje();
+  var mesAtual = hj.slice(0, 7);
+
+  // Calcula horas e km lançados no mês atual
+  var lancsMes = lancamentos.filter(function(l){ return l.data && l.data.slice(0, 7) === mesAtual; });
+  var totalH = 0, totalK = 0;
+  lancsMes.forEach(function(l){
+    totalH += (parseFloat(l.horas_trab) || 0);
+    totalK += (parseFloat(l.km_rodado) || 0);
+  });
+  $("totalHorasMes").textContent = totalH.toFixed(1) + " h";
+  $("totalKmMes").textContent = Math.round(totalK).toLocaleString("pt-BR") + " km";
+
+  // Preenche select de máquinas no formulário de lançamento
+  var selMaq = $("l_maq_id");
+  var valSel = selMaq.value;
+  selMaq.innerHTML = '<option value="">-- Selecione a Máquina / Veículo --</option>' +
+    maquinas.map(function(m){
+      var ic = iconeMaq(m.tipo);
+      return '<option value="' + m.id + '"' + (m.id === valSel ? ' selected' : '') + '>' + ic + ' ' + esc(m.nome) + (m.placa ? ' (' + esc(m.placa) + ')' : '') + '</option>';
+    }).join("");
+
+  atualizarInfoLancMaq();
+
+  // Renderiza Lista de Máquinas
+  if (maquinas.length === 0) {
+    $("listaMaquinas").innerHTML = '<div class="mut" style="text-align:center;padding:16px">Nenhum trator ou veículo cadastrado ainda. Clique no botão verde <b>"+ Nova Máquina / Veículo"</b> acima para cadastrar o primeiro!</div>';
+  } else {
+    $("listaMaquinas").innerHTML = maquinas.map(function(m){
+      var ic = iconeMaq(m.tipo);
+      var tags = [];
+      if (m.medicao === "Horímetro" || m.medicao === "Ambos") {
+        var hVal = parseFloat(m.horimetro_atual != null ? m.horimetro_atual : (m.horimetro_ini || 0));
+        tags.push('<span class="tag" style="font-weight:700;color:var(--ac);border-color:var(--ac)">⏱️ ' + hVal.toFixed(1) + ' h</span>');
+      }
+      if (m.medicao === "Quilometragem" || m.medicao === "Ambos") {
+        var kVal = parseFloat(m.km_atual != null ? m.km_atual : (m.km_ini || 0));
+        tags.push('<span class="tag" style="font-weight:700;color:var(--blue);border-color:var(--blue)">🛣️ ' + Math.round(kVal).toLocaleString("pt-BR") + ' km</span>');
+      }
+      if (m.placa) {
+        tags.push('<span class="tag">🏷️ ' + esc(m.placa) + '</span>');
+      }
+      if (m.operador_padrao) {
+        tags.push('<span class="tag">👤 ' + esc(m.operador_padrao) + '</span>');
+      }
+
+      var lancsDaMaq = lancamentos.filter(function(l){ return l.maq_id === m.id; }).sort(function(a,b){ return String(b.data).localeCompare(String(a.data)); });
+      var ult = lancsDaMaq[0];
+      var ultInfo = ult ? ('Último serviço: <b>' + esc(ult.atividade || "Serviço") + '</b> em ' + br(ult.data)) : "Sem lançamentos de uso ainda";
+
+      return '<div class="card">' +
+               '<div class="row">' +
+                 '<div>' +
+                   '<b style="font-size:17px">' + ic + ' ' + esc(m.nome) + '</b>' +
+                   '<div class="tags" style="margin:4px 0">' + tags.join("") + '</div>' +
+                   '<div class="mut" style="font-size:13px;margin-top:4px">' + ultInfo + '</div>' +
+                   (m.obs ? '<div class="mut" style="font-size:12px;margin-top:2px">💬 ' + esc(m.obs) + '</div>' : '') +
+                 '</div>' +
+                 '<div style="display:flex;flex-direction:column;gap:6px">' +
+                   '<button class="sm sec" onclick="abrirLancPara(\'' + m.id + '\')">⏱️ Lançar</button>' +
+                   '<button class="sm" onclick="editarMaq(\'' + m.id + '\')">✏️ Editar</button>' +
+                   '<button class="sm bad" onclick="excluirMaq(\'' + m.id + '\')" style="min-height:30px;padding:2px 8px">🗑️ Excluir</button>' +
+                 '</div>' +
+               '</div>' +
+             '</div>';
+    }).join("");
+  }
+
+  // Renderiza Histórico de Lançamentos
+  var lancsOrdenados = lancamentos.slice().sort(function(a,b){ return String(b.data).localeCompare(String(a.data)); });
+  if (lancsOrdenados.length === 0) {
+    $("listaLancamentos").innerHTML = '<div class="mut" style="text-align:center;padding:14px">Nenhum registro de uso feito ainda.</div>';
+  } else {
+    $("listaLancamentos").innerHTML = lancsOrdenados.slice(0, 50).map(function(l){
+      var maq = maquinas.filter(function(m){ return m.id === l.maq_id; })[0];
+      var nomeMaq = maq ? (iconeMaq(maq.tipo) + " " + maq.nome) : "Equipamento";
+      var det = [];
+      if (l.horimetro != null && l.horimetro !== "") {
+        det.push('⏱️ <b>' + parseFloat(l.horimetro).toFixed(1) + ' h</b>' + (l.horas_trab > 0 ? ' <span class="mut">(+' + parseFloat(l.horas_trab).toFixed(1) + 'h)</span>' : ''));
+      }
+      if (l.km != null && l.km !== "") {
+        det.push('🛣️ <b>' + Math.round(parseFloat(l.km)).toLocaleString("pt-BR") + ' km</b>' + (l.km_rodado > 0 ? ' <span class="mut">(+' + Math.round(l.km_rodado) + 'km)</span>' : ''));
+      }
+
+      return '<div class="card">' +
+               '<div class="row">' +
+                 '<div>' +
+                   '<b>' + esc(nomeMaq) + '</b> — <span style="font-weight:600;color:var(--ac)">' + esc(l.atividade || "Serviço") + '</span>' +
+                   '<div class="tags" style="margin:4px 0">' + det.map(function(d){ return '<span class="tag">' + d + '</span>'; }).join("") + '</div>' +
+                   '<div class="mut" style="font-size:13px">' +
+                     '📅 ' + br(l.data) +
+                     (l.operador ? ' · 👤 ' + esc(l.operador) : '') +
+                     (l.obs ? ' · 💬 ' + esc(l.obs) : '') +
+                   '</div>' +
+                 '</div>' +
+                 '<button class="sm bad" onclick="excluirLanc(\'' + l.id + '\')">Excluir</button>' +
+               '</div>' +
+             '</div>';
+    }).join("");
+  }
+}
+
+// CADASTRO DE MÁQUINA
+$("btnAbrirNovoMaq").onclick = function(){
+  editMaqId = null;
+  $("titCadMaq").textContent = "🚜 Cadastrar Máquina ou Veículo";
+  $("m_nome").value = "";
+  $("m_tipo").value = "Trator";
+  $("m_medicao").value = "Horímetro";
+  $("m_horimetro_ini").value = "";
+  $("m_km_ini").value = "";
+  $("m_placa").value = "";
+  $("m_operador_padrao").value = "";
+  $("m_obs").value = "";
+  $("m_msg").textContent = "";
+  $("boxCadMaq").hidden = false;
+  $("boxLancMaq").hidden = true;
+  $("m_nome").focus();
+};
+
+$("btnFecharCadMaq").onclick = function(){ $("boxCadMaq").hidden = true; };
+$("btnCancelarMaq").onclick = function(){ $("boxCadMaq").hidden = true; };
+
+$("btnSalvarMaq").onclick = function(){
+  var nome = $("m_nome").value.trim();
+  if (!nome) {
+    alert("Informe o nome ou modelo da máquina/veículo.");
+    $("m_nome").focus();
+    return;
+  }
+
+  var tipo = $("m_tipo").value;
+  var medicao = $("m_medicao").value;
+  var hIni = parseFloat($("m_horimetro_ini").value) || 0;
+  var kmIni = parseFloat($("m_km_ini").value) || 0;
+  var placa = $("m_placa").value.trim();
+  var operador = $("m_operador_padrao").value.trim();
+  var obs = $("m_obs").value.trim();
+
+  if (editMaqId) {
+    var maq = maquinas.filter(function(m){ return m.id === editMaqId; })[0];
+    if (maq) {
+      maq.nome = nome;
+      maq.tipo = tipo;
+      maq.medicao = medicao;
+      maq.placa = placa;
+      maq.operador_padrao = operador;
+      maq.obs = obs;
+      if (maq.horimetro_atual == null) maq.horimetro_atual = hIni;
+      if (maq.km_atual == null) maq.km_atual = kmIni;
+    }
+  } else {
+    var nova = {
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      nome: nome,
+      tipo: tipo,
+      medicao: medicao,
+      horimetro_ini: hIni,
+      horimetro_atual: hIni,
+      km_ini: kmIni,
+      km_atual: kmIni,
+      placa: placa,
+      operador_padrao: operador,
+      obs: obs
+    };
+    maquinas.push(nova);
+  }
+
+  saveMaquinas();
+  $("boxCadMaq").hidden = true;
+  renderMaq();
+};
+
+window.editarMaq = function(id){
+  var maq = maquinas.filter(function(m){ return m.id === id; })[0];
+  if (!maq) return;
+  editMaqId = id;
+  $("titCadMaq").textContent = "✏️ Editar " + maq.nome;
+  $("m_nome").value = maq.nome || "";
+  $("m_tipo").value = maq.tipo || "Trator";
+  $("m_medicao").value = maq.medicao || "Horímetro";
+  $("m_horimetro_ini").value = (maq.horimetro_atual != null ? maq.horimetro_atual : (maq.horimetro_ini || ""));
+  $("m_km_ini").value = (maq.km_atual != null ? maq.km_atual : (maq.km_ini || ""));
+  $("m_placa").value = maq.placa || "";
+  $("m_operador_padrao").value = maq.operador_padrao || "";
+  $("m_obs").value = maq.obs || "";
+  $("boxCadMaq").hidden = false;
+  $("boxLancMaq").hidden = true;
+};
+
+window.excluirMaq = function(id){
+  var maq = maquinas.filter(function(m){ return m.id === id; })[0];
+  if (!maq) return;
+  if (confirm("Deseja realmente apagar o cadastro de " + maq.nome + " e todo o seu histórico de lançamentos?")) {
+    maquinas = maquinas.filter(function(m){ return m.id !== id; });
+    lancamentos = lancamentos.filter(function(l){ return l.maq_id !== id; });
+    saveMaquinas();
+    saveLancamentos();
+    renderMaq();
+  }
+};
+
+// LANÇAMENTO DE HORÍMETRO / KM
+function atualizarInfoLancMaq(){
+  var maqId = $("l_maq_id").value;
+  var maq = maquinas.filter(function(m){ return m.id === maqId; })[0];
+  if (!maq) {
+    $("l_maq_info").textContent = "Selecione uma máquina para ver os valores atuais.";
+    return;
+  }
+  var hAtual = parseFloat(maq.horimetro_atual != null ? maq.horimetro_atual : (maq.horimetro_ini || 0));
+  var kAtual = parseFloat(maq.km_atual != null ? maq.km_atual : (maq.km_ini || 0));
+  var txt = [];
+  if (maq.medicao === "Horímetro" || maq.medicao === "Ambos") txt.push("Último Horímetro: <b>" + hAtual.toFixed(1) + " h</b>");
+  if (maq.medicao === "Quilometragem" || maq.medicao === "Ambos") txt.push("Última Quilometragem: <b>" + Math.round(kAtual).toLocaleString("pt-BR") + " km</b>");
+  $("l_maq_info").innerHTML = '📍 ' + txt.join(" · ");
+}
+
+$("l_maq_id").onchange = function(){
+  atualizarInfoLancMaq();
+  var maqId = $("l_maq_id").value;
+  var maq = maquinas.filter(function(m){ return m.id === maqId; })[0];
+  if (maq && maq.operador_padrao && !$("l_operador").value) {
+    $("l_operador").value = maq.operador_padrao;
+  }
+};
+
+window.abrirLancPara = function(maqId){
+  $("boxLancMaq").hidden = false;
+  $("boxCadMaq").hidden = true;
+  $("l_maq_id").value = maqId;
+  $("l_data").value = hoje();
+  $("l_horimetro").value = "";
+  $("l_km").value = "";
+  $("l_atividade").value = "";
+  $("l_obs").value = "";
+  var maq = maquinas.filter(function(m){ return m.id === maqId; })[0];
+  if (maq && maq.operador_padrao) $("l_operador").value = maq.operador_padrao;
+  atualizarInfoLancMaq();
+  if (maq && maq.medicao === "Quilometragem") {
+    $("l_km").focus();
+  } else {
+    $("l_horimetro").focus();
+  }
+};
+
+$("btnAbrirLancMaq").onclick = function(){
+  if (maquinas.length === 0) {
+    alert("Cadastre uma máquina ou veículo primeiro.");
+    $("btnAbrirNovoMaq").click();
+    return;
+  }
+  $("boxLancMaq").hidden = false;
+  $("boxCadMaq").hidden = true;
+  $("l_data").value = hoje();
+  $("l_horimetro").value = "";
+  $("l_km").value = "";
+  $("l_atividade").value = "";
+  $("l_obs").value = "";
+  atualizarInfoLancMaq();
+};
+
+$("btnFecharLancMaq").onclick = function(){ $("boxLancMaq").hidden = true; };
+$("btnCancelarLanc").onclick = function(){ $("boxLancMaq").hidden = true; };
+
+$("btnSalvarLanc").onclick = function(){
+  var maqId = $("l_maq_id").value;
+  if (!maqId) {
+    alert("Selecione qual máquina está sendo lançada.");
+    $("l_maq_id").focus();
+    return;
+  }
+
+  var maq = maquinas.filter(function(m){ return m.id === maqId; })[0];
+  if (!maq) return;
+
+  var dt = $("l_data").value;
+  if (!dt) {
+    alert("Informe a data do registro.");
+    return;
+  }
+
+  var novoH = $("l_horimetro").value !== "" ? parseFloat($("l_horimetro").value) : null;
+  var novoK = $("l_km").value !== "" ? parseFloat($("l_km").value) : null;
+
+  if (novoH == null && novoK == null) {
+    alert("Informe o Horímetro ou a Quilometragem marcada.");
+    return;
+  }
+
+  var ativ = $("l_atividade").value.trim() || "Uso operacional";
+  var op = $("l_operador").value.trim();
+  var obs = $("l_obs").value.trim();
+
+  // Calcula diferença de horas e km trabalhados
+  var horasTrab = 0;
+  if (novoH != null) {
+    var prevH = parseFloat(maq.horimetro_atual != null ? maq.horimetro_atual : (maq.horimetro_ini || 0));
+    if (novoH >= prevH) {
+      horasTrab = novoH - prevH;
+    }
+    maq.horimetro_atual = novoH;
+  }
+
+  var kmRodado = 0;
+  if (novoK != null) {
+    var prevK = parseFloat(maq.km_atual != null ? maq.km_atual : (maq.km_ini || 0));
+    if (novoK >= prevK) {
+      kmRodado = novoK - prevK;
+    }
+    maq.km_atual = novoK;
+  }
+
+  var lanc = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    maq_id: maqId,
+    data: dt,
+    horimetro: novoH,
+    km: novoK,
+    horas_trab: horasTrab,
+    km_rodado: kmRodado,
+    atividade: ativ,
+    operador: op,
+    obs: obs
+  };
+
+  lancamentos.push(lanc);
+  saveLancamentos();
+  saveMaquinas();
+
+  $("boxLancMaq").hidden = true;
+  renderMaq();
+  alert("✅ Registro salvo com sucesso!");
+};
+
+window.excluirLanc = function(id){
+  if (confirm("Deseja apagar este registro de horímetro/km?")) {
+    lancamentos = lancamentos.filter(function(l){ return l.id !== id; });
+    saveLancamentos();
+    renderMaq();
+  }
+};
+
+function exportarMaquinasExcel(){
+  if (maquinas.length === 0 && lancamentos.length === 0) {
+    alert("Nenhuma máquina ou registro para exportar.");
+    return;
+  }
+
+  var cabecalho = ["Data", "Máquina / Veículo", "Tipo", "Placa", "Atividade", "Horímetro Marcado (h)", "Horas Trabalhadas", "Km Marcado", "Km Rodado", "Operador", "Observações"];
+  var linhas = lancamentos.slice().sort(function(a,b){ return String(b.data).localeCompare(String(a.data)); }).map(function(l){
+    var maq = maquinas.filter(function(m){ return m.id === l.maq_id; })[0];
+    var valores = [
+      br(l.data),
+      maq ? maq.nome : "Desconhecido",
+      maq ? maq.tipo : "",
+      maq ? (maq.placa || "") : "",
+      l.atividade || "",
+      l.horimetro != null ? String(l.horimetro).replace(".", ",") : "",
+      l.horas_trab ? String(l.horas_trab.toFixed(1)).replace(".", ",") : "",
+      l.km != null ? String(l.km) : "",
+      l.km_rodado ? String(Math.round(l.km_rodado)) : "",
+      l.operador || "",
+      (l.obs || "").replace(/[\r\n]+/g, " ")
+    ];
+    return valores.map(function(v){ return '"' + String(v).replace(/"/g, '""') + '"'; }).join(";");
+  });
+
+  var csvContent = "\uFEFF" + cabecalho.join(";") + "\r\n" + linhas.join("\r\n");
+  var blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  var url = URL.createObjectURL(blob);
+  var link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", "GESTFAZ_Maquinas_" + hoje() + ".csv");
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+$("btnExportarMaquinas").onclick = exportarMaquinasExcel;
+
+// ==================== TEMA CLARO / ESCURO ====================
+function initTheme(){
+  var saved = localStorage.getItem("gestfaz_theme");
+  if (!saved) {
+    saved = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+  }
+  applyTheme(saved);
+}
+
+function applyTheme(th){
+  document.documentElement.setAttribute("data-theme", th);
+  try { localStorage.setItem("gestfaz_theme", th); } catch(e){}
+  var btn = $("btnTema");
+  if (btn) {
+    btn.innerHTML = (th === "dark") ? "☀️ Claro" : "🌙 Escuro";
+  }
+}
+
+$("btnTema").onclick = function(){
+  var cur = document.documentElement.getAttribute("data-theme") || "light";
+  var next = (cur === "dark") ? "light" : "dark";
+  applyTheme(next);
+};
+
+if ($("btnSyncNuvem")) {
+  $("btnSyncNuvem").onclick = function(){ sincronizarNuvem(false); };
+}
+
+initTheme();
+load();
+renderReb();
+atualizarBotaoAuth();
+
+// Sincronização em segundo plano ao abrir (se houver internet)
+setTimeout(function(){
+  if (navigator.onLine) sincronizarNuvem(true);
+}, 1200);
+</script>
+</body>
+</html>
